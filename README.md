@@ -22,8 +22,8 @@ Die **Bonus-App** ermöglicht Restaurantkund:innen, bei Einkäufen Punkte zu sam
 ## Architektur
 
 - **Backend**: Java 21, **Spring Boot 3** (Web, Validation, Security, Data JPA, Actuator), **Flyway** (Migration), **Springdoc OpenAPI**.
-- **Frontend**: **React** + Vite, React Router, Fetch/RTK Query, Tailwind (optional).
-- **DB**: Lokal **H2** (Dev/Test), **PostgreSQL** (Prod).
+- **Frontend**: **React** + Vite, Fetch Tailwind (optional).
+- **DB**: Lokal **H2** (Dev/Test)
 - **Build/Run**: Maven, Docker/Docker Compose.
 - **Auth**: stateless JWT (Access + Refresh), Rollen: `ADMIN`, `STAFF`, `CUSTOMER`.
 
