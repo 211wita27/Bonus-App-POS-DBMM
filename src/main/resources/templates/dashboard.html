@@ -61,7 +61,7 @@
         <div class="card p-6 reveal">
             <div class="text-sm uppercase tracking-[0.2em] text-ink/60">Latest Ledger Entries</div>
             <div class="mt-4 space-y-3" th:if="${account != null and account.ledgerEntries != null}">
-                <div class="ledger-row" th:each="entry : ${#lists.take(account.ledgerEntries, 6)}">
+                <div class="ledger-row" th:each="entry, iter : ${account.ledgerEntries}" th:if="${iter.index < 6}">
                     <div class="flex items-center justify-between">
                         <div class="font-semibold" th:text="${entry.entryType}">EARN</div>
                         <div class="text-sm text-ink/60" th:text="${entry.occurredAt}">-</div>
