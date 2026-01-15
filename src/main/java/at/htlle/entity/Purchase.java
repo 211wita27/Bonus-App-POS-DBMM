@@ -17,7 +17,8 @@ import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -42,8 +43,9 @@ public class Purchase {
     @JoinColumn(name = "loyalty_account_id", nullable = false)
     private LoyaltyAccount loyaltyAccount;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "branch_id")
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "branch_id", nullable = false)
     private Branch branch;
 
     @NotBlank
@@ -52,16 +54,18 @@ public class Purchase {
     private String purchaseNumber;
 
     @NotNull
-    @PositiveOrZero
+    @Positive
     @Digits(integer = 12, fraction = 2)
     @Column(name = "total_amount", nullable = false, precision = 12, scale = 2)
     private BigDecimal totalAmount;
 
     @NotBlank
     @Size(min = 3, max = 3)
+    @Pattern(regexp = "^[A-Z]{3}$")
     @Column(name = "currency", nullable = false, length = 3)
     private String currency;
 
+    @NotNull
     @PastOrPresent
     @Column(name = "purchased_at", nullable = false)
     private Instant purchasedAt;

@@ -1,0 +1,18 @@
+package at.htlle.dto;
+
+import at.htlle.entity.LoyaltyAccount;
+import java.time.Instant;
+import java.util.List;
+
+public record AccountResponse(
+        Long id,
+        String accountNumber,
+        Long customerId,
+        Long restaurantId,
+        LoyaltyAccount.Status status,
+        LoyaltyAccount.Tier tier,
+        Long currentPoints,
+        Instant createdAt,
+        Instant updatedAt,
+        List<LedgerEntryResponse> ledgerEntries) {
+}

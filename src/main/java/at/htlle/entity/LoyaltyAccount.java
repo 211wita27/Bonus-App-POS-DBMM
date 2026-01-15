@@ -35,6 +35,13 @@ import java.util.List;
 })
 public class LoyaltyAccount {
 
+    public enum Tier {
+        STANDARD,
+        SILVER,
+        GOLD,
+        PLATINUM
+    }
+
     public enum Status {
         ACTIVE,
         BLOCKED,
@@ -61,6 +68,10 @@ public class LoyaltyAccount {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
     private Status status = Status.ACTIVE;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tier", nullable = false, length = 20)
+    private Tier tier = Tier.STANDARD;
 
     @NotNull
     @PositiveOrZero
@@ -128,6 +139,14 @@ public class LoyaltyAccount {
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public Tier getTier() {
+        return tier;
+    }
+
+    public void setTier(Tier tier) {
+        this.tier = tier;
     }
 
     public Long getCurrentPoints() {

@@ -1,0 +1,140 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
+:root {
+  --bg-cream: #f7f0e6;
+  --bg-mint: #e7f5f1;
+  --ink: #1c2b28;
+  --ink-muted: rgba(28, 43, 40, 0.7);
+  --accent: #e76f51;
+  --accent-2: #2a9d8f;
+  --card: #ffffff;
+  --stroke: rgba(28, 43, 40, 0.12);
+  --shadow: 0 18px 40px rgba(31, 41, 55, 0.08);
+}
+
+body {
+  font-family: "Space Grotesk", sans-serif;
+  color: var(--ink);
+}
+
+.font-display {
+  font-family: "Fraunces", serif;
+}
+
+.text-ink {
+  color: var(--ink);
+}
+
+.app-bg {
+  background: radial-gradient(circle at top, #ffffff 0%, var(--bg-cream) 40%, var(--bg-mint) 100%);
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--stroke);
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+}
+
+.input {
+  border: 1px solid var(--stroke);
+  border-radius: 14px;
+  padding: 0.7rem 0.9rem;
+  background: #ffffff;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input:focus {
+  border-color: var(--accent-2);
+  box-shadow: 0 0 0 3px rgba(42, 157, 143, 0.15);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent) 0%, #f4a261 100%);
+  color: #ffffff;
+  padding: 0.7rem 1.4rem;
+  border-radius: 999px;
+  font-weight: 600;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(231, 111, 81, 0.25);
+}
+
+.btn-secondary {
+  background: #ffffff;
+  border: 1px solid var(--stroke);
+  color: var(--ink);
+  padding: 0.7rem 1.3rem;
+  border-radius: 999px;
+  font-weight: 600;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-secondary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(31, 41, 55, 0.08);
+}
+
+.nav-chip {
+  border: 1px solid var(--stroke);
+  border-radius: 999px;
+  padding: 0.4rem 1rem;
+  font-size: 0.9rem;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.nav-chip:hover {
+  border-color: var(--accent-2);
+  background: rgba(42, 157, 143, 0.08);
+}
+
+.points-big {
+  font-size: clamp(2.6rem, 5vw, 3.6rem);
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.stat-pill {
+  background: rgba(42, 157, 143, 0.12);
+  color: var(--accent-2);
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+}
+
+.ledger-row {
+  border: 1px solid var(--stroke);
+  border-radius: 16px;
+  padding: 0.8rem 1rem;
+  background: #fbfbfb;
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+form.is-loading {
+  opacity: 0.7;
+}
+
+form.is-loading button[type="submit"]::after {
+  content: " ...";
+}

@@ -16,11 +16,13 @@ import at.htlle.repository.PointRuleRepository;
 import at.htlle.repository.PurchaseRepository;
 import at.htlle.repository.RedemptionRepository;
 import at.htlle.repository.RewardRepository;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -36,6 +38,7 @@ public class LoyaltyService {
     private final RewardRepository rewardRepository;
     private final BranchRepository branchRepository;
     private final RedemptionRepository redemptionRepository;
+    private final PointCalculator pointCalculator;
 
     public LoyaltyService(
             LoyaltyAccountRepository loyaltyAccountRepository,
@@ -44,7 +47,8 @@ public class LoyaltyService {
             PointRuleRepository pointRuleRepository,
             RewardRepository rewardRepository,
             BranchRepository branchRepository,
-            RedemptionRepository redemptionRepository) {
+            RedemptionRepository redemptionRepository,
+            PointCalculator pointCalculator) {
         this.loyaltyAccountRepository = loyaltyAccountRepository;
         this.purchaseRepository = purchaseRepository;
         this.pointLedgerRepository = pointLedgerRepository;
@@ -52,46 +56,68 @@ public class LoyaltyService {
         this.rewardRepository = rewardRepository;
         this.branchRepository = branchRepository;
         this.redemptionRepository = redemptionRepository;
+        this.pointCalculator = pointCalculator;
     }
 
     @Transactional
     public PointLedger recordPurchase(PurchaseRequest request) {
         LoyaltyAccount account = loyaltyAccountRepository
                 .lockById(request.accountId())
-                .orElseThrow(() -> new IllegalArgumentException("Unknown account"));
+                .orElseThrow(() -> new EntityNotFoundException("Account not found"));
+
+        if (purchaseRepository.findByPurchaseNumber(request.purchaseNumber()).isPresent()) {
+            throw new IllegalArgumentException("Purchase number already exists");
+        }
+        if (request.totalAmount() == null || request.totalAmount().signum() <= 0) {
+            throw new IllegalArgumentException("Total amount must be greater than zero");
+        }
 
         Purchase purchase = new Purchase();
         purchase.setLoyaltyAccount(account);
         purchase.setPurchaseNumber(request.purchaseNumber());
-        purchase.setCurrency(request.currency());
+        purchase.setCurrency(request.currency().trim().toUpperCase(Locale.ROOT));
         purchase.setTotalAmount(request.totalAmount());
         purchase.setPurchasedAt(Optional.ofNullable(request.purchasedAt()).orElse(Instant.now()));
         purchase.setNotes(request.notes());
 
-        if (request.branchId() != null) {
-            Branch branch = branchRepository
-                    .findById(request.branchId())
-                    .orElseThrow(() -> new IllegalArgumentException("Branch not found"));
-            if (!branch.getRestaurant().getId().equals(account.getRestaurant().getId())) {
-                throw new IllegalArgumentException("Branch does not belong to restaurant");
-            }
-            purchase.setBranch(branch);
+        Branch branch = branchRepository
+                .findById(request.branchId())
+                .orElseThrow(() -> new EntityNotFoundException("Branch not found"));
+        if (!branch.getRestaurant().getId().equals(account.getRestaurant().getId())) {
+            throw new IllegalArgumentException("Branch does not belong to restaurant");
         }
+        purchase.setBranch(branch);
 
         Purchase persisted = purchaseRepository.save(purchase);
 
-        PointRule appliedRule = null;
+        PointRule appliedRule;
         if (request.pointRuleId() != null) {
             appliedRule = pointRuleRepository
                     .findById(request.pointRuleId())
-                    .filter(rule -> isRuleActive(rule, persisted.getPurchasedAt()))
-                    .orElseThrow(() -> new IllegalArgumentException("Point rule is not active"));
+                    .orElseThrow(() -> new EntityNotFoundException("Point rule not found"));
             if (!appliedRule.getRestaurant().getId().equals(account.getRestaurant().getId())) {
                 throw new IllegalArgumentException("Point rule does not belong to restaurant");
             }
+            if (!pointCalculator.isRuleActive(appliedRule, persisted.getPurchasedAt())) {
+                throw new IllegalStateException("Point rule is not active");
+            }
+        } else {
+            List<PointRule> candidates = pointRuleRepository.findActiveRulesForDate(
+                    account.getRestaurant().getId(),
+                    LocalDate.ofInstant(persisted.getPurchasedAt(), java.time.ZoneId.systemDefault()));
+            appliedRule = candidates.stream()
+                    .sorted(Comparator
+                            .comparing(PointRule::getValidFrom, Comparator.nullsLast(Comparator.naturalOrder()))
+                            .reversed()
+                            .thenComparing(PointRule::getId, Comparator.nullsLast(Comparator.reverseOrder())))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("No active point rule found"));
         }
 
-        long points = calculatePoints(persisted.getTotalAmount(), appliedRule);
+        long points = pointCalculator.calculatePoints(persisted.getTotalAmount(), appliedRule);
+        if (points == 0) {
+            throw new IllegalStateException("Calculated points is zero");
+        }
         long newBalance = account.getCurrentPoints() + points;
 
         PointLedger ledger = new PointLedger();
@@ -110,50 +136,28 @@ public class LoyaltyService {
         return pointLedgerRepository.save(ledger);
     }
 
-    private boolean isRuleActive(PointRule rule, Instant purchasedAt) {
-        if (!rule.isActive()) {
-            return false;
-        }
-        LocalDate reference = purchasedAt.atZone(java.time.ZoneId.systemDefault()).toLocalDate();
-        if (rule.getValidFrom() != null && rule.getValidFrom().isAfter(reference)) {
-            return false;
-        }
-        if (rule.getValidUntil() != null && rule.getValidUntil().isBefore(reference)) {
-            return false;
-        }
-        return true;
-    }
-
-    private long calculatePoints(BigDecimal amount, PointRule rule) {
-        if (rule == null) {
-            return amount.setScale(0, RoundingMode.DOWN).longValue();
-        }
-        BigDecimal effectiveAmount = amount;
-        if (rule.getAmountThreshold().compareTo(BigDecimal.ZERO) > 0) {
-            effectiveAmount = amount.divide(rule.getAmountThreshold(), 2, RoundingMode.DOWN);
-        }
-        BigDecimal base = switch (rule.getRuleType()) {
-            case MULTIPLIER -> effectiveAmount.multiply(rule.getMultiplier());
-            case FIXED -> BigDecimal.valueOf(rule.getBasePoints());
-        };
-        return base.setScale(0, RoundingMode.DOWN).longValue();
-    }
-
     @Transactional
     public Redemption redeemReward(RedemptionRequest request) {
         LoyaltyAccount account = loyaltyAccountRepository
                 .lockById(request.accountId())
-                .orElseThrow(() -> new IllegalArgumentException("Unknown account"));
+                .orElseThrow(() -> new EntityNotFoundException("Account not found"));
 
         Reward reward = rewardRepository
                 .findById(request.rewardId())
-                .orElseThrow(() -> new IllegalArgumentException("Reward not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Reward not found"));
+
+        Branch branch = branchRepository
+                .findById(request.branchId())
+                .orElseThrow(() -> new EntityNotFoundException("Branch not found"));
 
         if (!reward.isActive()) {
             throw new IllegalStateException("Reward inactive");
         }
         if (!reward.getRestaurant().getId().equals(account.getRestaurant().getId())) {
             throw new IllegalArgumentException("Reward does not belong to restaurant");
+        }
+        if (!branch.getRestaurant().getId().equals(account.getRestaurant().getId())) {
+            throw new IllegalArgumentException("Branch does not belong to restaurant");
         }
         LocalDate today = LocalDate.now();
         if (reward.getValidFrom() != null && reward.getValidFrom().isAfter(today)) {
@@ -184,6 +188,7 @@ public class LoyaltyService {
         Redemption redemption = new Redemption();
         redemption.setLoyaltyAccount(account);
         redemption.setReward(reward);
+        redemption.setBranch(branch);
         redemption.setLedgerEntry(persistedLedger);
         redemption.setStatus(Redemption.Status.COMPLETED);
         redemption.setRedeemedAt(Instant.now());

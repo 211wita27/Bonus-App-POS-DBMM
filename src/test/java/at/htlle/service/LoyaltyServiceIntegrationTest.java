@@ -19,7 +19,9 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 @SpringBootTest
 class LoyaltyServiceIntegrationTest {
 
@@ -44,7 +46,7 @@ class LoyaltyServiceIntegrationTest {
                 .orElseThrow();
         PointRule rule = pointRuleRepository.findAll().stream().findFirst().orElseThrow();
         Reward reward = rewardRepository.findAll().stream().findFirst().orElseThrow();
-        Long branchId = branchRepository.findAll().stream().findFirst().map(branch -> branch.getId()).orElse(null);
+        Long branchId = branchRepository.findAll().stream().findFirst().map(branch -> branch.getId()).orElseThrow();
 
         BigDecimal amount = BigDecimal.valueOf(123.45);
         PurchaseRequest purchaseRequest = new PurchaseRequest(
@@ -53,7 +55,7 @@ class LoyaltyServiceIntegrationTest {
                 "PUR-" + UUID.randomUUID(),
                 amount,
                 "EUR",
-                Instant.now(),
+                Instant.parse("2025-01-01T10:15:30Z"),
                 "Mittagessen",
                 "Integrationstest Kauf",
                 rule.getId());
@@ -64,7 +66,7 @@ class LoyaltyServiceIntegrationTest {
         assertThat(ledger.getEntryType()).isEqualTo(PointLedger.EntryType.EARN);
         assertThat(updatedAccount.getCurrentPoints()).isGreaterThanOrEqualTo(120);
 
-        RedemptionRequest redemptionRequest = new RedemptionRequest(account.getId(), reward.getId(), "Welcome Drink");
+        RedemptionRequest redemptionRequest = new RedemptionRequest(account.getId(), reward.getId(), branchId, "Welcome Drink");
         Redemption redemption = loyaltyService.redeemReward(redemptionRequest);
         LoyaltyAccount afterRedemption = loyaltyAccountRepository.findById(account.getId()).orElseThrow();
 
@@ -73,5 +75,18 @@ class LoyaltyServiceIntegrationTest {
 
         LoyaltyAccount synced = loyaltyService.synchronizeBalance(account.getId());
         assertThat(synced.getCurrentPoints()).isEqualTo(afterRedemption.getCurrentPoints());
+    }
+
+    @Test
+    void redeemShouldFailWhenInsufficientPoints() {
+        LoyaltyAccount account = loyaltyAccountRepository.findByAccountNumber("ACCT-0001")
+                .orElseThrow();
+        Reward reward = rewardRepository.findAll().stream().findFirst().orElseThrow();
+        Long branchId = branchRepository.findAll().stream().findFirst().map(branch -> branch.getId()).orElseThrow();
+
+        RedemptionRequest redemptionRequest = new RedemptionRequest(account.getId(), reward.getId(), branchId, "Test");
+
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () ->
+                loyaltyService.redeemReward(redemptionRequest));
     }
 }

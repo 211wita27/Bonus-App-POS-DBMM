@@ -13,6 +13,8 @@ public interface LoyaltyAccountRepository extends JpaRepository<LoyaltyAccount, 
 
     Optional<LoyaltyAccount> findByAccountNumber(String accountNumber);
 
+    Optional<LoyaltyAccount> findByCustomerIdAndRestaurantId(Long customerId, Long restaurantId);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select la from LoyaltyAccount la where la.id = :id")
     Optional<LoyaltyAccount> lockById(@Param("id") Long id);

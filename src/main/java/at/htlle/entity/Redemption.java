@@ -15,13 +15,15 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import java.time.Instant;
 
 @Entity
 @Table(name = "redemption", indexes = {
         @Index(name = "idx_redemption_account", columnList = "loyalty_account_id"),
-        @Index(name = "idx_redemption_reward", columnList = "reward_id")
+        @Index(name = "idx_redemption_reward", columnList = "reward_id"),
+        @Index(name = "idx_redemption_branch", columnList = "branch_id")
 })
 public class Redemption {
 
@@ -43,6 +45,10 @@ public class Redemption {
     @JoinColumn(name = "reward_id", nullable = false)
     private Reward reward;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "branch_id", nullable = false)
+    private Branch branch;
+
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "ledger_entry_id", nullable = false, unique = true)
     private PointLedger ledgerEntry;
@@ -51,6 +57,7 @@ public class Redemption {
     @Column(name = "status", nullable = false, length = 20)
     private Status status = Status.PENDING;
 
+    @NotNull
     @PastOrPresent
     @Column(name = "redeemed_at", nullable = false)
     private Instant redeemedAt = Instant.now();
@@ -60,6 +67,7 @@ public class Redemption {
     private String notes;
 
     @NotNull
+    @Positive
     @Column(name = "points_spent", nullable = false)
     private Long pointsSpent;
 
@@ -81,6 +89,14 @@ public class Redemption {
 
     public void setReward(Reward reward) {
         this.reward = reward;
+    }
+
+    public Branch getBranch() {
+        return branch;
+    }
+
+    public void setBranch(Branch branch) {
+        this.branch = branch;
     }
 
     public PointLedger getLedgerEntry() {

@@ -14,6 +14,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -51,10 +52,12 @@ public class PointLedger {
     @Column(name = "points", nullable = false)
     private Long points;
 
+    @NotNull
     @PositiveOrZero
     @Column(name = "balance_after", nullable = false)
     private Long balanceAfter;
 
+    @NotNull
     @PastOrPresent
     @Column(name = "occurred_at", nullable = false)
     private Instant occurredAt;
@@ -79,6 +82,11 @@ public class PointLedger {
         if (occurredAt == null) {
             occurredAt = Instant.now();
         }
+    }
+
+    @AssertTrue(message = "points must not be zero")
+    private boolean isPointsNonZero() {
+        return points != null && points != 0;
     }
 
     public Long getId() {
