@@ -3,6 +3,7 @@ package at.htlle.controller;
 import at.htlle.dto.ErrorResponse;
 import at.htlle.dto.PurchaseRequest;
 import at.htlle.dto.PurchaseResponse;
+import at.htlle.util.SessionAccountResolver;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
@@ -24,16 +25,24 @@ public class PurchaseController {
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
+    private final SessionAccountResolver sessionAccountResolver;
 
-    public PurchaseController(RestTemplateBuilder restTemplateBuilder, ObjectMapper objectMapper) {
+    public PurchaseController(RestTemplateBuilder restTemplateBuilder,
+                              ObjectMapper objectMapper,
+                              SessionAccountResolver sessionAccountResolver) {
         this.restTemplate = restTemplateBuilder.build();
         this.objectMapper = objectMapper;
+        this.sessionAccountResolver = sessionAccountResolver;
     }
 
     @GetMapping("/purchase")
-    public String purchaseForm(@RequestParam(name = "accountId", defaultValue = "1") Long accountId,
-                               @RequestParam(name = "branchId", required = false) Long branchId,
-                               Model model) {
+    public String purchaseForm(@RequestParam(name = "branchId", required = false) Long branchId,
+                               Model model,
+                               HttpServletRequest request) {
+        Long accountId = sessionAccountResolver.getAccountId(request);
+        if (accountId == null) {
+            return "redirect:/login";
+        }
         model.addAttribute("accountId", accountId);
         model.addAttribute("branchId", branchId != null ? branchId : 1L);
         model.addAttribute("currency", "EUR");
@@ -41,8 +50,7 @@ public class PurchaseController {
     }
 
     @PostMapping("/purchase")
-    public String createPurchase(@RequestParam("accountId") Long accountId,
-                                 @RequestParam("branchId") Long branchId,
+    public String createPurchase(@RequestParam("branchId") Long branchId,
                                  @RequestParam("purchaseNumber") String purchaseNumber,
                                  @RequestParam("totalAmount") BigDecimal totalAmount,
                                  @RequestParam(name = "currency", defaultValue = "EUR") String currency,
@@ -50,6 +58,10 @@ public class PurchaseController {
                                  @RequestParam(name = "description", required = false) String description,
                                  Model model,
                                  HttpServletRequest request) {
+        Long accountId = sessionAccountResolver.getAccountId(request);
+        if (accountId == null) {
+            return "redirect:/login";
+        }
         String normalizedCurrency = currency.trim().toUpperCase(Locale.ROOT);
         PurchaseRequest payload = new PurchaseRequest(
                 accountId,

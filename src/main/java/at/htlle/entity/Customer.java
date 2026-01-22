@@ -24,7 +24,8 @@ import java.util.List;
 @Entity
 @Table(name = "customer", uniqueConstraints = {
         @UniqueConstraint(name = "uk_customer_email", columnNames = "email"),
-        @UniqueConstraint(name = "uk_customer_external_id", columnNames = "external_id")
+        @UniqueConstraint(name = "uk_customer_external_id", columnNames = "external_id"),
+        @UniqueConstraint(name = "uk_customer_username", columnNames = "username")
 })
 public class Customer {
 
@@ -55,6 +56,16 @@ public class Customer {
     @Size(max = 255)
     @Column(name = "email", nullable = false, length = 255)
     private String email;
+
+    @NotBlank
+    @Size(max = 60)
+    @Column(name = "username", nullable = false, length = 60)
+    private String username;
+
+    @NotBlank
+    @Size(max = 255)
+    @Column(name = "password", nullable = false, length = 255)
+    private String password;
 
     @Size(max = 30)
     @Column(name = "phone_number", length = 30)
@@ -127,6 +138,22 @@ public class Customer {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public Status getStatus() {

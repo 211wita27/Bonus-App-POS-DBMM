@@ -4,6 +4,7 @@ import at.htlle.dto.AccountResponse;
 import at.htlle.dto.LedgerEntryResponse;
 import at.htlle.dto.PurchaseRequest;
 import at.htlle.dto.PurchaseResponse;
+import at.htlle.dto.PurchaseDetailsResponse;
 import at.htlle.dto.RedemptionRequest;
 import at.htlle.dto.RedemptionResponse;
 import at.htlle.entity.LoyaltyAccount;
@@ -99,6 +100,25 @@ public class LoyaltyController {
         return buildAccountResponse(account, includeLedger);
     }
 
+    @GetMapping("/ledger/{id}/purchase")
+    public PurchaseDetailsResponse getPurchaseDetails(@PathVariable("id") Long ledgerId) {
+        PointLedger ledger = pointLedgerRepository.findById(ledgerId)
+                .orElseThrow(() -> new EntityNotFoundException("Ledger entry not found"));
+        Purchase purchase = ledger.getPurchase();
+        if (purchase == null) {
+            throw new EntityNotFoundException("Purchase not found for ledger entry");
+        }
+
+        return new PurchaseDetailsResponse(
+                ledger.getLoyaltyAccount().getId(),
+                purchase.getBranch().getId(),
+                purchase.getPurchaseNumber(),
+                purchase.getTotalAmount(),
+                purchase.getCurrency(),
+                purchase.getNotes(),
+                ledger.getDescription());
+    }
+
     private AccountResponse buildAccountResponse(LoyaltyAccount account, boolean includeLedger) {
         List<LedgerEntryResponse> ledgerEntries = null;
         if (includeLedger) {
@@ -112,6 +132,8 @@ public class LoyaltyController {
                 account.getId(),
                 account.getAccountNumber(),
                 account.getCustomer().getId(),
+                account.getCustomer().getFirstName(),
+                account.getCustomer().getLastName(),
                 account.getRestaurant().getId(),
                 account.getStatus(),
                 account.getTier(),

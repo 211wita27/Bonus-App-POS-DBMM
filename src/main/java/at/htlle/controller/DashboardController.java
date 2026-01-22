@@ -2,6 +2,7 @@ package at.htlle.controller;
 
 import at.htlle.dto.AccountResponse;
 import at.htlle.dto.ErrorResponse;
+import at.htlle.util.SessionAccountResolver;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Instant;
@@ -9,7 +10,6 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -20,21 +20,27 @@ public class DashboardController {
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
+    private final SessionAccountResolver sessionAccountResolver;
 
-    public DashboardController(RestTemplateBuilder restTemplateBuilder, ObjectMapper objectMapper) {
+    public DashboardController(RestTemplateBuilder restTemplateBuilder,
+                               ObjectMapper objectMapper,
+                               SessionAccountResolver sessionAccountResolver) {
         this.restTemplate = restTemplateBuilder.build();
         this.objectMapper = objectMapper;
+        this.sessionAccountResolver = sessionAccountResolver;
     }
 
     @GetMapping("/")
     public String home() {
-        return "redirect:/dashboard";
+        return "index";
     }
 
     @GetMapping("/dashboard")
-    public String dashboard(@RequestParam(name = "accountId", defaultValue = "1") Long accountId,
-                            Model model,
-                            HttpServletRequest request) {
+    public String dashboard(Model model, HttpServletRequest request) {
+        Long accountId = sessionAccountResolver.getAccountId(request);
+        if (accountId == null) {
+            return "redirect:/login";
+        }
         String baseUrl = baseUrl(request);
         try {
             AccountResponse account = restTemplate.getForObject(

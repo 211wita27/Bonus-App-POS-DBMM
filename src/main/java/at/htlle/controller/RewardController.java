@@ -4,6 +4,7 @@ import at.htlle.dto.AccountResponse;
 import at.htlle.dto.ErrorResponse;
 import at.htlle.dto.RedemptionRequest;
 import at.htlle.dto.RedemptionResponse;
+import at.htlle.util.SessionAccountResolver;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Instant;
@@ -29,27 +30,36 @@ public class RewardController {
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
+    private final SessionAccountResolver sessionAccountResolver;
 
-    public RewardController(RestTemplateBuilder restTemplateBuilder, ObjectMapper objectMapper) {
+    public RewardController(RestTemplateBuilder restTemplateBuilder,
+                            ObjectMapper objectMapper,
+                            SessionAccountResolver sessionAccountResolver) {
         this.restTemplate = restTemplateBuilder.build();
         this.objectMapper = objectMapper;
+        this.sessionAccountResolver = sessionAccountResolver;
     }
 
     @GetMapping("/rewards")
-    public String rewards(@RequestParam(name = "accountId", defaultValue = "1") Long accountId,
-                          Model model,
-                          HttpServletRequest request) {
+    public String rewards(Model model, HttpServletRequest request) {
+        Long accountId = sessionAccountResolver.getAccountId(request);
+        if (accountId == null) {
+            return "redirect:/login";
+        }
         loadRewardsPage(accountId, model, request, null);
         return "rewards";
     }
 
     @PostMapping("/rewards/redeem")
-    public String redeem(@RequestParam("accountId") Long accountId,
-                         @RequestParam("rewardId") Long rewardId,
+    public String redeem(@RequestParam("rewardId") Long rewardId,
                          @RequestParam("branchId") Long branchId,
                          @RequestParam(name = "notes", required = false) String notes,
                          Model model,
                          HttpServletRequest request) {
+        Long accountId = sessionAccountResolver.getAccountId(request);
+        if (accountId == null) {
+            return "redirect:/login";
+        }
         RedemptionRequest payload = new RedemptionRequest(accountId, rewardId, branchId, notes);
         String baseUrl = baseUrl(request);
         try {

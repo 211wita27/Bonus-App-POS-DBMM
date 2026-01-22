@@ -8,6 +8,8 @@ public record AccountResponse(
         Long id,
         String accountNumber,
         Long customerId,
+        String firstName,
+        String lastName,
         Long restaurantId,
         LoyaltyAccount.Status status,
         LoyaltyAccount.Tier tier,
