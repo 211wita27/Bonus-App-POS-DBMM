@@ -15,7 +15,7 @@ import org.springframework.util.StringUtils;
 @Service
 public class AdminManagementService {
 
-    private static final String FIXED_ADMIN_USERNAME = "Admin";
+    private static final String FIXED_ADMIN_USERNAME = "admin";
 
     private final CustomerRepository customerRepository;
     private final LoyaltyAccountRepository loyaltyAccountRepository;

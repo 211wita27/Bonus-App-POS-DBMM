@@ -40,7 +40,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class AdminController {
 
     private static final String DEFAULT_POINT_RULE_NAME = "Default Points";
-    private static final String FIXED_ADMIN_USERNAME = "Admin";
+    private static final String FIXED_ADMIN_USERNAME = "admin";
 
     private final RestaurantRepository restaurantRepository;
     private final BranchRepository branchRepository;
