@@ -4,16 +4,28 @@ import at.htlle.entity.Branch;
 import at.htlle.entity.PointRule;
 import at.htlle.entity.Restaurant;
 import at.htlle.entity.Reward;
+import at.htlle.entity.Customer;
+import at.htlle.entity.LoyaltyAccount;
+import at.htlle.entity.PointLedger;
+import at.htlle.entity.Purchase;
+import at.htlle.entity.Redemption;
 import at.htlle.repository.BranchRepository;
+import at.htlle.repository.CustomerRepository;
+import at.htlle.repository.LoyaltyAccountRepository;
+import at.htlle.repository.PointLedgerRepository;
 import at.htlle.repository.PointRuleRepository;
+import at.htlle.repository.PurchaseRepository;
+import at.htlle.repository.RedemptionRepository;
 import at.htlle.repository.RestaurantRepository;
 import at.htlle.repository.RewardRepository;
+import at.htlle.service.AdminManagementService;
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,32 +33,144 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
 
     private static final String DEFAULT_POINT_RULE_NAME = "Default Points";
+    private static final String FIXED_ADMIN_USERNAME = "Admin";
 
     private final RestaurantRepository restaurantRepository;
     private final BranchRepository branchRepository;
     private final RewardRepository rewardRepository;
     private final PointRuleRepository pointRuleRepository;
+    private final CustomerRepository customerRepository;
+    private final LoyaltyAccountRepository loyaltyAccountRepository;
+    private final PointLedgerRepository pointLedgerRepository;
+    private final PurchaseRepository purchaseRepository;
+    private final RedemptionRepository redemptionRepository;
+    private final AdminManagementService adminManagementService;
 
     public AdminController(RestaurantRepository restaurantRepository,
                            BranchRepository branchRepository,
                            RewardRepository rewardRepository,
-                           PointRuleRepository pointRuleRepository) {
+                           PointRuleRepository pointRuleRepository,
+                           CustomerRepository customerRepository,
+                           LoyaltyAccountRepository loyaltyAccountRepository,
+                           PointLedgerRepository pointLedgerRepository,
+                           PurchaseRepository purchaseRepository,
+                           RedemptionRepository redemptionRepository,
+                           AdminManagementService adminManagementService) {
         this.restaurantRepository = restaurantRepository;
         this.branchRepository = branchRepository;
         this.rewardRepository = rewardRepository;
         this.pointRuleRepository = pointRuleRepository;
+        this.customerRepository = customerRepository;
+        this.loyaltyAccountRepository = loyaltyAccountRepository;
+        this.pointLedgerRepository = pointLedgerRepository;
+        this.purchaseRepository = purchaseRepository;
+        this.redemptionRepository = redemptionRepository;
+        this.adminManagementService = adminManagementService;
     }
 
     @GetMapping
     public String adminHome(Model model) {
-        loadAdminData(model);
+        model.addAttribute("customerCount", customerRepository.count());
+        model.addAttribute("restaurantCount", restaurantRepository.count());
+        model.addAttribute("pointsInCirculation", loyaltyAccountRepository.sumCurrentPoints());
+        List<PointLedger> recentLedger = pointLedgerRepository
+                .findAllByOrderByOccurredAtDescIdDesc(PageRequest.of(0, 8))
+                .getContent();
+        model.addAttribute("recentLedger", recentLedger);
         return "admin";
+    }
+
+    @GetMapping("/customers")
+    public String customers(Model model) {
+        List<Customer> customers = customerRepository.findAll().stream()
+                .sorted(Comparator.comparing(Customer::getId))
+                .toList();
+        List<CustomerSummary> summaries = customers.stream()
+                .map(customer -> new CustomerSummary(customer, primaryAccount(customer.getId())))
+                .toList();
+        model.addAttribute("customers", summaries);
+        model.addAttribute("adminUsername", FIXED_ADMIN_USERNAME);
+        return "admin-customers";
+    }
+
+    @PostMapping("/customers/{id}/role")
+    public String updateRole(@PathVariable("id") Long customerId,
+                             @RequestParam("role") Customer.Role role,
+                             RedirectAttributes redirectAttributes) {
+        adminManagementService.updateCustomerRole(customerId, role)
+                .ifPresent(message -> redirectAttributes.addFlashAttribute("errorMessage", message));
+        return "redirect:/admin/customers";
+    }
+
+    @PostMapping("/customers/{id}/status")
+    public String updateStatus(@PathVariable("id") Long customerId,
+                               @RequestParam("status") Customer.Status status,
+                               RedirectAttributes redirectAttributes) {
+        adminManagementService.updateCustomerStatus(customerId, status)
+                .ifPresent(message -> redirectAttributes.addFlashAttribute("errorMessage", message));
+        return "redirect:/admin/customers";
+    }
+
+    @PostMapping("/customers/{id}/delete")
+    public String deleteCustomer(@PathVariable("id") Long customerId,
+                                 RedirectAttributes redirectAttributes) {
+        adminManagementService.deleteCustomer(customerId)
+                .ifPresent(message -> redirectAttributes.addFlashAttribute("errorMessage", message));
+        return "redirect:/admin/customers";
+    }
+
+    @GetMapping("/ledger")
+    public String ledger(Model model) {
+        List<PointLedger> entries = pointLedgerRepository
+                .findAllByOrderByOccurredAtDescIdDesc(PageRequest.of(0, 200))
+                .getContent();
+        model.addAttribute("entries", entries);
+        return "admin-ledger";
+    }
+
+    @PostMapping("/ledger/adjust")
+    public String adjustPoints(@RequestParam("accountId") Long accountId,
+                               @RequestParam("pointsDelta") Long pointsDelta,
+                               @RequestParam("reason") String reason,
+                               RedirectAttributes redirectAttributes) {
+        adminManagementService.adjustPoints(accountId, pointsDelta, reason)
+                .ifPresent(message -> redirectAttributes.addFlashAttribute("errorMessage", message));
+        return "redirect:/admin/ledger";
+    }
+
+    @GetMapping("/purchases")
+    public String purchases(Model model) {
+        List<Purchase> purchases = purchaseRepository.findAllByOrderByPurchasedAtDesc();
+        model.addAttribute("purchases", purchases);
+        return "admin-purchases";
+    }
+
+    @GetMapping("/rewards")
+    public String rewards(Model model) {
+        List<Reward> rewards = rewardRepository.findAll().stream()
+                .sorted(Comparator.comparing(Reward::getName, Comparator.nullsLast(String::compareToIgnoreCase)))
+                .toList();
+        List<Restaurant> restaurants = restaurantRepository.findAll().stream()
+                .sorted(Comparator.comparing(Restaurant::getName, Comparator.nullsLast(String::compareToIgnoreCase)))
+                .toList();
+        List<Redemption> redemptions = redemptionRepository.findAllByOrderByRedeemedAtDesc();
+        model.addAttribute("rewards", rewards);
+        model.addAttribute("restaurants", restaurants);
+        model.addAttribute("redemptions", redemptions);
+        return "admin-rewards";
+    }
+
+    @GetMapping("/restaurants")
+    public String restaurants(Model model) {
+        loadAdminData(model);
+        return "admin-restaurants";
     }
 
     @PostMapping("/restaurants/create")
@@ -220,5 +344,14 @@ public class AdminController {
         model.addAttribute("branches", branches);
         model.addAttribute("rewards", rewards);
         model.addAttribute("defaultRules", defaultRules);
+    }
+
+    private LoyaltyAccount primaryAccount(Long customerId) {
+        return loyaltyAccountRepository.findByCustomerIdOrderByIdAsc(customerId).stream()
+                .findFirst()
+                .orElse(null);
+    }
+
+    private record CustomerSummary(Customer customer, LoyaltyAccount account) {
     }
 }
