@@ -32,6 +32,7 @@ public class SecurityConfig {
             AuthenticationSuccessHandler authenticationSuccessHandler,
             Environment environment
     ) throws Exception {
+
         boolean devProfileActive = environment.acceptsProfiles(Profiles.of("dev"));
 
         http
@@ -42,14 +43,37 @@ public class SecurityConfig {
                 }
             })
 
-            // Authorisierung
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login", "/signup", "/css/**", "/js/**", "/images/**").permitAll()
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/dashboard", "/purchase", "/rewards", "/api/**").hasRole("USER")
-                .anyRequest().authenticated()
-            )
+            // AUTHORIZATION (ALLES IN EINEM BLOCK!)
+            .authorizeHttpRequests(auth -> {
+                auth
+                    // public
+                    .requestMatchers(
+                        "/login",
+                        "/signup",
+                        "/css/**",
+                        "/js/**",
+                        "/images/**"
+                    ).permitAll()
 
+                    // H2 Console (nur dev)
+                    .requestMatchers(PathRequest.toH2Console()).permitAll()
+
+                    // admin
+                    .requestMatchers("/admin/**").hasRole("ADMIN")
+
+                    // user
+                    .requestMatchers(
+                        "/dashboard",
+                        "/purchase",
+                        "/rewards",
+                        "/api/**"
+                    ).hasRole("USER")
+
+                    // ALLES ANDERE
+                    .anyRequest().authenticated();
+            })
+
+            // HTTP Basic aus
             .httpBasic(AbstractHttpConfigurer::disable)
 
             // Login
@@ -61,7 +85,7 @@ public class SecurityConfig {
                 .permitAll()
             )
 
-            // ✅ RICHTIGER LOGOUT (DAS WAR DER FEHLER)
+            // Logout
             .logout(logout -> logout
                 .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "POST"))
                 .invalidateHttpSession(true)
@@ -71,9 +95,9 @@ public class SecurityConfig {
                 .permitAll()
             );
 
+        // H2 Frame-Options (nur dev)
         if (devProfileActive) {
-            http.headers(headers -> headers.frameOptions(frame -> frame.disable()))
-                .authorizeHttpRequests(auth -> auth.requestMatchers(PathRequest.toH2Console()).permitAll());
+            http.headers(headers -> headers.frameOptions(frame -> frame.disable()));
         }
 
         return http.build();
@@ -89,12 +113,14 @@ public class SecurityConfig {
                     org.springframework.security.core.Authentication authentication
             ) throws IOException, ServletException {
 
-                Set<String> roles = AuthorityUtils.authorityListToSet(authentication.getAuthorities());
+                Set<String> roles =
+                        AuthorityUtils.authorityListToSet(authentication.getAuthorities());
                 String username = authentication.getName();
 
                 if (roles.contains("ROLE_USER")) {
                     Long accountId = authService.resolveAccountId(username)
-                            .orElseThrow(() -> new IllegalStateException("No loyalty account available for user"));
+                        .orElseThrow(() ->
+                            new IllegalStateException("No loyalty account available for user"));
                     request.getSession(true).setAttribute("accountId", accountId);
                 }
 
@@ -112,3 +138,5 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
+
+
