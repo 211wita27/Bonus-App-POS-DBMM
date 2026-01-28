@@ -21,6 +21,9 @@ import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import java.time.Instant;
 
+/**
+ * Ledger entry representing point debits and credits.
+ */
 @Entity
 @Table(name = "point_ledger", indexes = {
         @Index(name = "idx_point_ledger_account", columnList = "loyalty_account_id"),

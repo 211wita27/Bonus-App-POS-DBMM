@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
+/**
+ * Provides account read models for customer dashboards.
+ */
 @Service
 public class AccountService {
 
@@ -23,16 +26,36 @@ public class AccountService {
         this.pointLedgerRepository = pointLedgerRepository;
     }
 
+    /**
+     * Loads a single loyalty account and maps it to an API response.
+     *
+     * @param accountId loyalty account id
+     * @param includeLedger whether to include ledger history
+     * @return account response model
+     */
     public AccountResponse getAccountResponse(Long accountId, boolean includeLedger) {
         LoyaltyAccount account = loyaltyAccountRepository.findById(accountId)
                 .orElseThrow(() -> new EntityNotFoundException("Account not found"));
         return buildAccountResponse(account, includeLedger);
     }
 
+    /**
+     * Returns all accounts for the given customer id.
+     *
+     * @param customerId customer id
+     * @return accounts owned by the customer
+     */
     public List<LoyaltyAccount> getAccountsForCustomer(Long customerId) {
         return loyaltyAccountRepository.findByCustomerId(customerId);
     }
 
+    /**
+     * Converts a loyalty account entity into a response DTO.
+     *
+     * @param account loyalty account entity
+     * @param includeLedger whether to include ledger entries
+     * @return account response model
+     */
     public AccountResponse buildAccountResponse(LoyaltyAccount account, boolean includeLedger) {
         List<LedgerEntryResponse> ledgerEntries = null;
         if (includeLedger) {

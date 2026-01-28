@@ -25,6 +25,9 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Purchase record tied to a loyalty account.
+ */
 @Entity
 @Table(name = "purchase", uniqueConstraints = {
         @UniqueConstraint(name = "uk_purchase_number", columnNames = "purchase_number")

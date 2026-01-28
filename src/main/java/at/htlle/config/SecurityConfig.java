@@ -12,10 +12,22 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+/**
+ * Spring Security configuration for role-based access control.
+ */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
+    /**
+     * Builds the main security filter chain.
+     *
+     * @param http http security builder
+     * @param successHandler login success handler
+     * @param appUserAuthProvider authentication provider for app users
+     * @return security filter chain
+     * @throws Exception when configuration fails
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    RoleBasedAuthenticationSuccessHandler successHandler,
@@ -45,11 +57,23 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * Password encoder for app user credentials.
+     *
+     * @return password encoder
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Authentication provider backed by {@link AppUserDetailsService}.
+     *
+     * @param appUserDetailsService user details service
+     * @param passwordEncoder password encoder
+     * @return authentication provider
+     */
     @Bean
     public DaoAuthenticationProvider appUserAuthProvider(AppUserDetailsService appUserDetailsService,
                                                          PasswordEncoder passwordEncoder) {

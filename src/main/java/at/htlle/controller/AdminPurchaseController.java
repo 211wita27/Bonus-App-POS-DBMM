@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+/**
+ * Handles manual purchase creation from the admin UI.
+ */
 @Controller
 public class AdminPurchaseController {
 
@@ -21,6 +24,14 @@ public class AdminPurchaseController {
         this.loyaltyService = loyaltyService;
     }
 
+    /**
+     * Displays the purchase creation form.
+     *
+     * @param accountId optional account id
+     * @param restaurantId optional restaurant id
+     * @param model view model
+     * @return view name
+     */
     @GetMapping("/admin/purchases/new")
     public String purchaseForm(@RequestParam(name = "accountId", required = false) Long accountId,
                                @RequestParam(name = "restaurantId", required = false) Long restaurantId,
@@ -31,6 +42,19 @@ public class AdminPurchaseController {
         return "purchase";
     }
 
+    /**
+     * Creates a purchase and updates the ledger.
+     *
+     * @param accountId loyalty account id
+     * @param restaurantId restaurant id
+     * @param purchaseNumber purchase number
+     * @param totalAmount total amount
+     * @param currency currency code
+     * @param notes optional notes
+     * @param description optional description
+     * @param model view model
+     * @return view name
+     */
     @PostMapping("/admin/purchases/new")
     public String createPurchase(@RequestParam("accountId") Long accountId,
                                  @RequestParam("restaurantId") Long restaurantId,

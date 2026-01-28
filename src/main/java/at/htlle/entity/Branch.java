@@ -14,6 +14,9 @@ import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+/**
+ * Branch location for a restaurant.
+ */
 @Entity
 @Table(name = "branch", uniqueConstraints = {
         @UniqueConstraint(name = "uk_branch_code_per_restaurant", columnNames = {"restaurant_id", "branch_code"})

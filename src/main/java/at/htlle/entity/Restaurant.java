@@ -18,6 +18,9 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Restaurant entity storing configuration and branding metadata.
+ */
 @Entity
 @Table(name = "restaurant", uniqueConstraints = {
         @UniqueConstraint(name = "uk_restaurant_code", columnNames = "code"),

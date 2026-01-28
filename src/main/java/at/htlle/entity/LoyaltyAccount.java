@@ -24,6 +24,9 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Loyalty account tying a customer to a restaurant.
+ */
 @Entity
 @Table(name = "loyalty_account", uniqueConstraints = {
         @UniqueConstraint(name = "uk_loyalty_account_number", columnNames = "account_number"),

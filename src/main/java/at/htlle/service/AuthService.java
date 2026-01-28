@@ -13,6 +13,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+/**
+ * Handles customer registration and lookup helpers for authentication.
+ */
 @Service
 public class AuthService {
 
@@ -31,6 +34,16 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    /**
+     * Registers a new customer and creates a default loyalty account.
+     *
+     * @param firstName customer first name
+     * @param lastName customer last name
+     * @param email customer email
+     * @param username desired username
+     * @param password plain text password
+     * @return newly created loyalty account
+     */
     public LoyaltyAccount register(String firstName,
                                    String lastName,
                                    String email,
@@ -65,6 +78,12 @@ public class AuthService {
         return loyaltyAccountRepository.save(account);
     }
 
+    /**
+     * Resolves the single loyalty account id for a username.
+     *
+     * @param username customer username
+     * @return optional account id
+     */
     public Optional<Long> resolveAccountId(String username) {
         if (!StringUtils.hasText(username)) {
             return Optional.empty();

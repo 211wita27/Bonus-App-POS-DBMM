@@ -10,6 +10,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+/**
+ * Bridges legacy customer logins to Spring Security.
+ */
 @Service
 public class CustomerUserDetailsService implements UserDetailsService {
 
@@ -19,6 +22,12 @@ public class CustomerUserDetailsService implements UserDetailsService {
         this.customerRepository = customerRepository;
     }
 
+    /**
+     * Loads a customer and maps it to Spring Security {@link UserDetails}.
+     *
+     * @param username customer username
+     * @return user details
+     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Customer customer = customerRepository.findByUsername(username)

@@ -3,6 +3,9 @@ package at.htlle.dto;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+/**
+ * API request payload for redeeming a reward.
+ */
 public record RedemptionRequest(
         @NotNull Long accountId,
         @NotNull Long rewardId,

@@ -4,6 +4,9 @@ import at.htlle.entity.LoyaltyAccount;
 import java.time.Instant;
 import java.util.List;
 
+/**
+ * Response payload for a loyalty account, optionally including ledger entries.
+ */
 public record AccountResponse(
         Long id,
         String accountNumber,

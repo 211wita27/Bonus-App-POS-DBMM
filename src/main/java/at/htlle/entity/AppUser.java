@@ -21,6 +21,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.Instant;
 
+/**
+ * Application user used for role-based authentication.
+ */
 @Entity
 @Table(name = "app_user", uniqueConstraints = {
         @UniqueConstraint(name = "uk_app_user_email", columnNames = "email")

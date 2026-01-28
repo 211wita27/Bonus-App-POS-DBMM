@@ -6,6 +6,9 @@ import java.time.LocalDate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+/**
+ * Scheduled maintenance tasks for rewards.
+ */
 @Service
 public class RewardMaintenanceService {
 
@@ -15,6 +18,9 @@ public class RewardMaintenanceService {
         this.rewardRepository = rewardRepository;
     }
 
+    /**
+     * Deletes rewards whose valid-until date has already passed.
+     */
     @Scheduled(cron = "0 0 2 * * *")
     @Transactional
     public void purgeExpiredRewards() {

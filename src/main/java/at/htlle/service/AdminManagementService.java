@@ -12,6 +12,9 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+/**
+ * Administrative operations for managing customers and loyalty points.
+ */
 @Service
 public class AdminManagementService {
 
@@ -29,6 +32,13 @@ public class AdminManagementService {
         this.pointLedgerRepository = pointLedgerRepository;
     }
 
+    /**
+     * Updates a customer's role unless the account is the fixed admin.
+     *
+     * @param customerId customer id
+     * @param role new role
+     * @return optional error message
+     */
     @Transactional
     public Optional<String> updateCustomerRole(Long customerId, Customer.Role role) {
         Customer customer = customerRepository.findById(customerId)
@@ -44,6 +54,13 @@ public class AdminManagementService {
         return Optional.empty();
     }
 
+    /**
+     * Updates a customer's status unless the account is the fixed admin.
+     *
+     * @param customerId customer id
+     * @param status new status
+     * @return optional error message
+     */
     @Transactional
     public Optional<String> updateCustomerStatus(Long customerId, Customer.Status status) {
         Customer customer = customerRepository.findById(customerId)
@@ -59,6 +76,12 @@ public class AdminManagementService {
         return Optional.empty();
     }
 
+    /**
+     * Deletes a customer unless it is the fixed admin.
+     *
+     * @param customerId customer id
+     * @return optional error message
+     */
     @Transactional
     public Optional<String> deleteCustomer(Long customerId) {
         Customer customer = customerRepository.findById(customerId)
@@ -73,6 +96,14 @@ public class AdminManagementService {
         return Optional.empty();
     }
 
+    /**
+     * Applies a manual points adjustment for a loyalty account.
+     *
+     * @param accountId loyalty account id
+     * @param pointsDelta delta to apply
+     * @param reason adjustment reason
+     * @return optional error message
+     */
     @Transactional
     public Optional<String> adjustPoints(Long accountId, Long pointsDelta, String reason) {
         if (pointsDelta == null || pointsDelta == 0) {

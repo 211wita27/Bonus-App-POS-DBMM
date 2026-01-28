@@ -8,6 +8,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+/**
+ * Resolves the active loyalty account id from the session or authentication.
+ */
 @Component
 public class SessionAccountResolver {
 
@@ -17,6 +20,12 @@ public class SessionAccountResolver {
         this.authService = authService;
     }
 
+    /**
+     * Returns the active account id, resolving it from the user if missing.
+     *
+     * @param request HTTP request
+     * @return account id or {@code null} if unauthenticated
+     */
     public Long getAccountId(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         Long accountId = extractAccountId(session);
@@ -35,10 +44,21 @@ public class SessionAccountResolver {
         return resolved;
     }
 
+    /**
+     * Stores the active account id in the session.
+     *
+     * @param request HTTP request
+     * @param accountId loyalty account id
+     */
     public void setAccountId(HttpServletRequest request, Long accountId) {
         request.getSession(true).setAttribute("accountId", accountId);
     }
 
+    /**
+     * Clears the account selection by invalidating the session.
+     *
+     * @param request HTTP request
+     */
     public void clear(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         if (session != null) {

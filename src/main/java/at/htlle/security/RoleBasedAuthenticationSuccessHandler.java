@@ -9,9 +9,19 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
+/**
+ * Redirects users to the correct dashboard based on their role.
+ */
 @Component
 public class RoleBasedAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
+    /**
+     * Redirects to the appropriate landing page after login.
+     *
+     * @param request HTTP request
+     * @param response HTTP response
+     * @param authentication authentication result
+     */
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,

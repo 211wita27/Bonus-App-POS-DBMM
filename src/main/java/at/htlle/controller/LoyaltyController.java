@@ -22,6 +22,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * REST API endpoints for purchases, redemptions, and account queries.
+ */
 @RestController
 @RequestMapping("/api")
 public class LoyaltyController {
@@ -36,6 +39,12 @@ public class LoyaltyController {
         this.accountService = accountService;
     }
 
+    /**
+     * Records a purchase and returns the created ledger summary.
+     *
+     * @param request purchase payload
+     * @return purchase response
+     */
     @PostMapping("/purchases")
     public ResponseEntity<PurchaseResponse> recordPurchase(@Valid @RequestBody PurchaseRequest request) {
         PointLedger ledger = loyaltyService.recordPurchase(request);
@@ -56,6 +65,12 @@ public class LoyaltyController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    /**
+     * Redeems a reward and returns the redemption summary.
+     *
+     * @param request redemption payload
+     * @return redemption response
+     */
     @PostMapping("/redemptions")
     public ResponseEntity<RedemptionResponse> redeemReward(@Valid @RequestBody RedemptionRequest request) {
         Redemption redemption = loyaltyService.redeemReward(request);
@@ -76,12 +91,26 @@ public class LoyaltyController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    /**
+     * Synchronizes account balance from the ledger.
+     *
+     * @param accountId account id
+     * @param includeLedger whether to include ledger entries
+     * @return account response
+     */
     @PostMapping("/accounts/{id}/sync")
     public AccountResponse synchronizeBalance(@PathVariable("id") Long accountId,
                                               @RequestParam(defaultValue = "false") boolean includeLedger) {
         return accountService.buildAccountResponse(loyaltyService.synchronizeBalance(accountId), includeLedger);
     }
 
+    /**
+     * Returns account details.
+     *
+     * @param accountId account id
+     * @param includeLedger whether to include ledger entries
+     * @return account response
+     */
     @GetMapping("/accounts/{id}")
     public AccountResponse getAccount(@PathVariable("id") Long accountId,
                                       @RequestParam(defaultValue = "false") boolean includeLedger) {

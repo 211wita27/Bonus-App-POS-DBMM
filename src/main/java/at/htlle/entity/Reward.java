@@ -22,6 +22,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Reward that can be redeemed with loyalty points.
+ */
 @Entity
 @Table(name = "reward", uniqueConstraints = {
         @UniqueConstraint(name = "uk_reward_code_per_restaurant", columnNames = {"restaurant_id", "reward_code"})

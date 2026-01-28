@@ -15,6 +15,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+/**
+ * Renders the admin dashboard summary view.
+ */
 @Controller
 public class AdminDashboardController {
 
@@ -42,6 +45,12 @@ public class AdminDashboardController {
         this.branchRepository = branchRepository;
     }
 
+    /**
+     * Displays summary counts and restaurant list.
+     *
+     * @param model view model
+     * @return view name
+     */
     @GetMapping("/admin/dashboard")
     public String dashboard(Model model) {
         List<Restaurant> restaurants = restaurantRepository.findAll().stream()

@@ -3,6 +3,9 @@ package at.htlle.dto;
 import at.htlle.entity.Redemption;
 import java.time.Instant;
 
+/**
+ * API response payload summarizing a redemption.
+ */
 public record RedemptionResponse(
         Long redemptionId,
         Long accountId,

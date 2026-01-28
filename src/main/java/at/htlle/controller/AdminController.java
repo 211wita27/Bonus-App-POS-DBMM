@@ -36,6 +36,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+/**
+ * Admin console controller for customers, rewards, ledger, and restaurants.
+ */
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
@@ -77,6 +80,12 @@ public class AdminController {
         this.adminManagementService = adminManagementService;
     }
 
+    /**
+     * Displays the admin home summary.
+     *
+     * @param model view model
+     * @return view name
+     */
     @GetMapping
     public String adminHome(Model model) {
         model.addAttribute("customerCount", customerRepository.count());
@@ -89,6 +98,12 @@ public class AdminController {
         return "admin";
     }
 
+    /**
+     * Displays the customer list for administrators.
+     *
+     * @param model view model
+     * @return view name
+     */
     @GetMapping("/customers")
     public String customers(Model model) {
         List<Customer> customers = customerRepository.findAll().stream()
@@ -102,6 +117,14 @@ public class AdminController {
         return "admin-customers";
     }
 
+    /**
+     * Updates a customer's role.
+     *
+     * @param customerId customer id
+     * @param role new role
+     * @param redirectAttributes redirect flash messages
+     * @return redirect target
+     */
     @PostMapping("/customers/{id}/role")
     public String updateRole(@PathVariable("id") Long customerId,
                              @RequestParam("role") Customer.Role role,
@@ -111,6 +134,14 @@ public class AdminController {
         return "redirect:/admin/customers";
     }
 
+    /**
+     * Updates a customer's status.
+     *
+     * @param customerId customer id
+     * @param status new status
+     * @param redirectAttributes redirect flash messages
+     * @return redirect target
+     */
     @PostMapping("/customers/{id}/status")
     public String updateStatus(@PathVariable("id") Long customerId,
                                @RequestParam("status") Customer.Status status,
@@ -120,6 +151,13 @@ public class AdminController {
         return "redirect:/admin/customers";
     }
 
+    /**
+     * Deletes a customer account.
+     *
+     * @param customerId customer id
+     * @param redirectAttributes redirect flash messages
+     * @return redirect target
+     */
     @PostMapping("/customers/{id}/delete")
     public String deleteCustomer(@PathVariable("id") Long customerId,
                                  RedirectAttributes redirectAttributes) {
@@ -128,6 +166,13 @@ public class AdminController {
         return "redirect:/admin/customers";
     }
 
+    /**
+     * Displays a single customer detail page.
+     *
+     * @param customerId customer id
+     * @param model view model
+     * @return view name
+     */
     @GetMapping("/customers/{id}")
     public String customerDetail(@PathVariable("id") Long customerId, Model model) {
         Customer customer = customerRepository.findById(customerId)
@@ -140,6 +185,16 @@ public class AdminController {
         return "admin-customer-detail";
     }
 
+    /**
+     * Applies a manual points adjustment for a customer account.
+     *
+     * @param customerId customer id
+     * @param accountId loyalty account id
+     * @param pointsDelta points delta
+     * @param reason adjustment reason
+     * @param redirectAttributes redirect flash messages
+     * @return redirect target
+     */
     @PostMapping("/customers/{id}/adjust")
     public String adjustCustomerPoints(@PathVariable("id") Long customerId,
                                        @RequestParam("accountId") Long accountId,
@@ -151,6 +206,12 @@ public class AdminController {
         return "redirect:/admin/customers/" + customerId;
     }
 
+    /**
+     * Displays ledger entries and point rule configuration.
+     *
+     * @param model view model
+     * @return view name
+     */
     @GetMapping("/ledger")
     public String ledger(Model model) {
         List<PointLedger> entries = pointLedgerRepository
@@ -161,6 +222,12 @@ public class AdminController {
         return "admin-ledger";
     }
 
+    /**
+     * Displays the manual adjustment page.
+     *
+     * @param model view model
+     * @return view name
+     */
     @GetMapping("/adjustments")
     public String adjustments(Model model) {
         List<LoyaltyAccount> accounts = loyaltyAccountRepository.findAll().stream()
@@ -170,6 +237,15 @@ public class AdminController {
         return "admin-adjustments";
     }
 
+    /**
+     * Applies a manual adjustment from the adjustments page.
+     *
+     * @param accountId loyalty account id
+     * @param pointsDelta points delta
+     * @param reason adjustment reason
+     * @param redirectAttributes redirect flash messages
+     * @return redirect target
+     */
     @PostMapping("/adjustments")
     public String applyAdjustment(@RequestParam("accountId") Long accountId,
                                   @RequestParam("pointsDelta") Long pointsDelta,
@@ -180,6 +256,15 @@ public class AdminController {
         return "redirect:/admin/adjustments";
     }
 
+    /**
+     * Legacy adjustment endpoint redirecting to the adjustments page.
+     *
+     * @param accountId loyalty account id
+     * @param pointsDelta points delta
+     * @param reason adjustment reason
+     * @param redirectAttributes redirect flash messages
+     * @return redirect target
+     */
     @PostMapping("/ledger/adjust")
     public String adjustPoints(@RequestParam("accountId") Long accountId,
                                @RequestParam("pointsDelta") Long pointsDelta,
@@ -190,6 +275,12 @@ public class AdminController {
         return "redirect:/admin/adjustments";
     }
 
+    /**
+     * Displays recent purchases.
+     *
+     * @param model view model
+     * @return view name
+     */
     @GetMapping("/purchases")
     public String purchases(Model model) {
         List<Purchase> purchases = purchaseRepository.findAllByOrderByPurchasedAtDesc();
@@ -197,6 +288,12 @@ public class AdminController {
         return "admin-purchases";
     }
 
+    /**
+     * Displays rewards and redemption history.
+     *
+     * @param model view model
+     * @return view name
+     */
     @GetMapping("/rewards")
     public String rewards(Model model) {
         List<Restaurant> restaurants = restaurantRepository.findAll().stream()
@@ -233,12 +330,27 @@ public class AdminController {
         return "admin-rewards";
     }
 
+    /**
+     * Displays restaurant, branch, and reward management view.
+     *
+     * @param model view model
+     * @return view name
+     */
     @GetMapping("/restaurants")
     public String restaurants(Model model) {
         loadAdminData(model);
         return "admin-restaurants";
     }
 
+    /**
+     * Creates a new restaurant.
+     *
+     * @param name restaurant name
+     * @param code restaurant code
+     * @param active active flag
+     * @param defaultCurrency default currency code
+     * @return redirect target
+     */
     @PostMapping("/restaurants/create")
     public String createRestaurant(@RequestParam("name") String name,
                                    @RequestParam("code") String code,
@@ -253,6 +365,16 @@ public class AdminController {
         return "redirect:/admin";
     }
 
+    /**
+     * Updates restaurant details.
+     *
+     * @param restaurantId restaurant id
+     * @param name restaurant name
+     * @param code restaurant code
+     * @param active active flag
+     * @param defaultCurrency default currency code
+     * @return redirect target
+     */
     @PostMapping("/restaurants/{id}/update")
     public String updateRestaurant(@PathVariable("id") Long restaurantId,
                                    @RequestParam("name") String name,
@@ -269,6 +391,14 @@ public class AdminController {
         return "redirect:/admin";
     }
 
+    /**
+     * Creates or updates the default point rule for a restaurant.
+     *
+     * @param restaurantId restaurant id
+     * @param pointsPerEuro multiplier value
+     * @param active active flag
+     * @return redirect target
+     */
     @PostMapping("/points-rules/set")
     public String setPointsRule(@RequestParam("restaurantId") Long restaurantId,
                                 @RequestParam("pointsPerEuro") BigDecimal pointsPerEuro,
@@ -288,6 +418,15 @@ public class AdminController {
         return "redirect:/admin";
     }
 
+    /**
+     * Creates a new restaurant branch.
+     *
+     * @param restaurantId restaurant id
+     * @param branchCode branch code
+     * @param name branch name
+     * @param defaultBranch default branch flag
+     * @return redirect target
+     */
     @PostMapping("/branches/create")
     public String createBranch(@RequestParam("restaurantId") Long restaurantId,
                                @RequestParam("branchCode") String branchCode,
@@ -307,6 +446,16 @@ public class AdminController {
         return "redirect:/admin";
     }
 
+    /**
+     * Updates a branch.
+     *
+     * @param branchId branch id
+     * @param restaurantId restaurant id
+     * @param branchCode branch code
+     * @param name branch name
+     * @param defaultBranch default branch flag
+     * @return redirect target
+     */
     @PostMapping("/branches/{id}/update")
     public String updateBranch(@PathVariable("id") Long branchId,
                                @RequestParam("restaurantId") Long restaurantId,
@@ -328,6 +477,12 @@ public class AdminController {
         return "redirect:/admin";
     }
 
+    /**
+     * Marks a branch as the default branch.
+     *
+     * @param branchId branch id
+     * @return redirect target
+     */
     @PostMapping("/branches/{id}/default")
     public String setDefaultBranch(@PathVariable("id") Long branchId) {
         Branch branch = branchRepository.findById(branchId)
@@ -338,6 +493,18 @@ public class AdminController {
         return "redirect:/admin";
     }
 
+    /**
+     * Creates a new reward.
+     *
+     * @param restaurantId restaurant id
+     * @param rewardCode reward code
+     * @param name reward name
+     * @param description reward description
+     * @param costPoints points cost
+     * @param validUntil optional expiration date
+     * @param active active flag
+     * @return redirect target
+     */
     @PostMapping("/rewards/create")
     public String createReward(@RequestParam("restaurantId") Long restaurantId,
                                @RequestParam("rewardCode") String rewardCode,
@@ -361,6 +528,19 @@ public class AdminController {
         return "redirect:/admin";
     }
 
+    /**
+     * Updates an existing reward.
+     *
+     * @param rewardId reward id
+     * @param restaurantId restaurant id
+     * @param rewardCode reward code
+     * @param name reward name
+     * @param description reward description
+     * @param costPoints points cost
+     * @param validUntil optional expiration date
+     * @param active active flag
+     * @return redirect target
+     */
     @PostMapping("/rewards/{id}/update")
     public String updateReward(@PathVariable("id") Long rewardId,
                                @RequestParam("restaurantId") Long restaurantId,

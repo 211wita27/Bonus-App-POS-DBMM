@@ -23,6 +23,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+/**
+ * Handles reward browsing and redemption for customer accounts.
+ */
 @Controller
 public class CustomerRewardController {
 
@@ -46,6 +49,14 @@ public class CustomerRewardController {
         this.qrCodeService = qrCodeService;
     }
 
+    /**
+     * Displays redeemable rewards for the selected account.
+     *
+     * @param accountId optional account selection
+     * @param session current HTTP session
+     * @param model view model
+     * @return view name
+     */
     @GetMapping("/customer/rewards")
     public String rewards(@RequestParam(name = "accountId", required = false) Long accountId,
                           HttpSession session,
@@ -71,6 +82,16 @@ public class CustomerRewardController {
         return "rewards";
     }
 
+    /**
+     * Redeems a reward and shows the redemption success screen with QR data.
+     *
+     * @param accountId loyalty account id
+     * @param rewardId reward id
+     * @param notes optional redemption notes
+     * @param session current HTTP session
+     * @param model view model
+     * @return view name
+     */
     @PostMapping("/customer/rewards/redeem")
     public String redeem(@RequestParam("accountId") Long accountId,
                          @RequestParam("rewardId") Long rewardId,
@@ -185,6 +206,9 @@ public class CustomerRewardController {
                 + "|A" + redemption.accountId();
     }
 
+    /**
+     * View model for a reward card on the customer rewards page.
+     */
     public record RewardCard(Long rewardId, String name, String description, long costPoints) {
     }
 }

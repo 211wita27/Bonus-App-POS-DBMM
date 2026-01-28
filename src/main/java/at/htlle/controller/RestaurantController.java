@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * REST endpoints for restaurant listings and rewards.
+ */
 @RestController
 @RequestMapping("/api/restaurants")
 public class RestaurantController {
@@ -25,6 +28,11 @@ public class RestaurantController {
         this.rewardRepository = rewardRepository;
     }
 
+    /**
+     * Lists active restaurants.
+     *
+     * @return restaurant summaries
+     */
     @GetMapping
     public List<RestaurantSummary> listRestaurants() {
         return restaurantRepository.findByActiveTrue().stream()
@@ -32,6 +40,12 @@ public class RestaurantController {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Lists active rewards for a restaurant.
+     *
+     * @param restaurantId restaurant id
+     * @return reward summaries
+     */
     @GetMapping("/{id}/rewards")
     public List<RewardSummary> listActiveRewards(@PathVariable("id") Long restaurantId) {
         Restaurant restaurant = restaurantRepository.findById(restaurantId)

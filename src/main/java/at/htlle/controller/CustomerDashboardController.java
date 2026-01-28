@@ -14,6 +14,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+/**
+ * Handles customer dashboard rendering and account selection persistence.
+ */
 @Controller
 public class CustomerDashboardController {
 
@@ -27,6 +30,12 @@ public class CustomerDashboardController {
         this.currentUserService = currentUserService;
     }
 
+    /**
+     * Routes authenticated users to their landing page based on role.
+     *
+     * @param authentication current authentication, if any
+     * @return redirect target
+     */
     @GetMapping("/")
     public String home(Authentication authentication) {
         if (authentication == null) {
@@ -37,6 +46,14 @@ public class CustomerDashboardController {
         return isAdmin ? "redirect:/admin/dashboard" : "redirect:/customer/dashboard";
     }
 
+    /**
+     * Renders the customer dashboard for the selected loyalty account.
+     *
+     * @param accountId optional account selection
+     * @param session current HTTP session
+     * @param model view model
+     * @return view name
+     */
     @GetMapping("/customer/dashboard")
     public String dashboard(@RequestParam(name = "accountId", required = false) Long accountId,
                             HttpSession session,

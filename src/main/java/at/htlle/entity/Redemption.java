@@ -19,6 +19,9 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import java.time.Instant;
 
+/**
+ * Reward redemption record and status.
+ */
 @Entity
 @Table(name = "redemption", indexes = {
         @Index(name = "idx_redemption_account", columnList = "loyalty_account_id"),

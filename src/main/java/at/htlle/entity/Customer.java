@@ -20,6 +20,9 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Customer profile entity storing identity and status information.
+ */
 @Entity
 @Table(name = "customer", uniqueConstraints = {
         @UniqueConstraint(name = "uk_customer_email", columnNames = "email"),

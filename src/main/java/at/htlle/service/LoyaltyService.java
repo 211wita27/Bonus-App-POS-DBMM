@@ -29,6 +29,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+/**
+ * Core loyalty operations for purchases, points, and redemptions.
+ */
 @Service
 public class LoyaltyService {
 
@@ -66,6 +69,12 @@ public class LoyaltyService {
         this.pointCalculator = pointCalculator;
     }
 
+    /**
+     * Records a purchase and credits points to the loyalty account.
+     *
+     * @param request purchase payload
+     * @return persisted ledger entry
+     */
     @Transactional
     public PointLedger recordPurchase(PurchaseRequest request) {
         LoyaltyAccount account = loyaltyAccountRepository
@@ -143,6 +152,12 @@ public class LoyaltyService {
         return pointLedgerRepository.save(ledger);
     }
 
+    /**
+     * Redeems a reward and debits points from the loyalty account.
+     *
+     * @param request redemption payload
+     * @return persisted redemption
+     */
     @Transactional
     public Redemption redeemReward(RedemptionRequest request) {
         LoyaltyAccount account = loyaltyAccountRepository
@@ -210,6 +225,12 @@ public class LoyaltyService {
         return saved;
     }
 
+    /**
+     * Recalculates the account balance from the ledger sum.
+     *
+     * @param accountId loyalty account id
+     * @return updated account
+     */
     @Transactional
     public LoyaltyAccount synchronizeBalance(Long accountId) {
         LoyaltyAccount account = loyaltyAccountRepository

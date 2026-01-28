@@ -17,6 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+/**
+ * Handles end-user registration and account provisioning.
+ */
 @Service
 public class UserService {
 
@@ -38,6 +41,12 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    /**
+     * Registers a new customer, loyalty account, and app user.
+     *
+     * @param request registration payload
+     * @return created app user
+     */
     @Transactional
     public AppUser registerCustomer(RegistrationRequest request) {
         String email = normalizeEmail(request.email());
@@ -91,6 +100,12 @@ public class UserService {
         return appUserRepository.save(user);
     }
 
+    /**
+     * Loads an application user by email address.
+     *
+     * @param email user email
+     * @return app user
+     */
     public AppUser loadByEmail(String email) {
         return appUserRepository.findByEmail(normalizeEmail(email))
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));

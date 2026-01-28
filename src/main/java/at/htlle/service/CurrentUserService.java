@@ -8,6 +8,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+/**
+ * Resolves the currently authenticated application user.
+ */
 @Service
 public class CurrentUserService {
 
@@ -17,6 +20,11 @@ public class CurrentUserService {
         this.appUserRepository = appUserRepository;
     }
 
+    /**
+     * Looks up the current user from the security context.
+     *
+     * @return current {@link AppUser}
+     */
     public AppUser getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {

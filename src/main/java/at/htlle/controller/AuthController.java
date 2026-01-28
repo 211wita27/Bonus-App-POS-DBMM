@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+/**
+ * Renders login and registration pages.
+ */
 @Controller
 public class AuthController {
 
@@ -20,6 +23,15 @@ public class AuthController {
         this.userService = userService;
     }
 
+    /**
+     * Displays the login page and status messages.
+     *
+     * @param error optional error flag
+     * @param logout optional logout flag
+     * @param registered optional registration flag
+     * @param model view model
+     * @return view name
+     */
     @GetMapping("/login")
     public String login(@RequestParam(name = "error", required = false) String error,
                         @RequestParam(name = "logout", required = false) String logout,
@@ -31,6 +43,12 @@ public class AuthController {
         return "login";
     }
 
+    /**
+     * Displays the registration form.
+     *
+     * @param model view model
+     * @return view name
+     */
     @GetMapping("/register")
     public String register(Model model) {
         if (!model.containsAttribute("registration")) {
@@ -39,6 +57,14 @@ public class AuthController {
         return "register";
     }
 
+    /**
+     * Handles registration form submission.
+     *
+     * @param request registration payload
+     * @param bindingResult validation result
+     * @param model view model
+     * @return view or redirect
+     */
     @PostMapping("/register")
     public String registerSubmit(@Valid @ModelAttribute("registration") RegistrationRequest request,
                                  BindingResult bindingResult,

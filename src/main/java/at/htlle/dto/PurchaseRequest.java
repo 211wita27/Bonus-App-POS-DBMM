@@ -10,6 +10,9 @@ import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.Instant;
 
+/**
+ * API request payload for recording a purchase.
+ */
 public record PurchaseRequest(
         @NotNull Long accountId,
         @NotNull Long restaurantId,

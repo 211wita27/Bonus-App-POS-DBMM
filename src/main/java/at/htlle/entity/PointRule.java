@@ -21,6 +21,9 @@ import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+/**
+ * Rule describing how purchases convert into points.
+ */
 @Entity
 @Table(name = "point_rule", uniqueConstraints = {
         @UniqueConstraint(name = "uk_point_rule_name_per_restaurant", columnNames = {"restaurant_id", "name"})

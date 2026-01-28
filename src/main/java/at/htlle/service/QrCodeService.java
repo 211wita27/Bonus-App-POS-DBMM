@@ -10,9 +10,19 @@ import java.io.IOException;
 import java.util.Base64;
 import org.springframework.stereotype.Service;
 
+/**
+ * Generates QR code images for redemption payloads.
+ */
 @Service
 public class QrCodeService {
 
+    /**
+     * Creates a PNG QR code and returns it as a data URI.
+     *
+     * @param content payload to encode
+     * @param size square image size in pixels
+     * @return data URI with base64 PNG
+     */
     public String generateDataUri(String content, int size) {
         try {
             QRCodeWriter writer = new QRCodeWriter();

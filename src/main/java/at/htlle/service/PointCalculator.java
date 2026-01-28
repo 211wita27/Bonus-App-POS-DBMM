@@ -9,9 +9,19 @@ import java.time.ZoneId;
 import java.util.Objects;
 import org.springframework.stereotype.Component;
 
+/**
+ * Calculates earned points based on point rules.
+ */
 @Component
 public class PointCalculator {
 
+    /**
+     * Calculates points for a given purchase amount and rule.
+     *
+     * @param amount purchase amount
+     * @param rule point rule or {@code null} for simple rounding
+     * @return points earned
+     */
     public long calculatePoints(BigDecimal amount, PointRule rule) {
         Objects.requireNonNull(amount, "amount");
         BigDecimal normalizedAmount = amount.setScale(2, RoundingMode.DOWN);
@@ -27,10 +37,25 @@ public class PointCalculator {
         return pointsDecimal.setScale(0, RoundingMode.DOWN).longValue();
     }
 
+    /**
+     * Checks whether a rule is active at the given time using the system zone.
+     *
+     * @param rule point rule
+     * @param purchasedAt purchase timestamp
+     * @return {@code true} if active
+     */
     public boolean isRuleActive(PointRule rule, Instant purchasedAt) {
         return isRuleActive(rule, purchasedAt, ZoneId.systemDefault());
     }
 
+    /**
+     * Checks whether a rule is active at the given time and zone.
+     *
+     * @param rule point rule
+     * @param purchasedAt purchase timestamp
+     * @param zoneId zone to use for date checks
+     * @return {@code true} if active
+     */
     public boolean isRuleActive(PointRule rule, Instant purchasedAt, ZoneId zoneId) {
         Objects.requireNonNull(rule, "rule");
         if (!rule.isActive()) {

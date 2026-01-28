@@ -28,6 +28,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+/**
+ * Restaurant portal controller for managing customers, purchases, and rewards.
+ */
 @Controller
 @RequestMapping("/restaurant")
 public class RestaurantDashboardController {
@@ -53,6 +56,12 @@ public class RestaurantDashboardController {
         this.loyaltyService = loyaltyService;
     }
 
+    /**
+     * Displays the restaurant dashboard.
+     *
+     * @param model view model
+     * @return view name
+     */
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
         Restaurant restaurant = requireRestaurant();
@@ -72,6 +81,17 @@ public class RestaurantDashboardController {
         return "restaurant-dashboard";
     }
 
+    /**
+     * Creates a new reward for the current restaurant.
+     *
+     * @param rewardCode reward code
+     * @param name reward name
+     * @param description reward description
+     * @param costPoints point cost
+     * @param validUntil optional expiration date
+     * @param redirectAttributes redirect flash messages
+     * @return redirect target
+     */
     @PostMapping("/rewards")
     public String createReward(@RequestParam("rewardCode") String rewardCode,
                                @RequestParam("name") String name,
@@ -98,6 +118,18 @@ public class RestaurantDashboardController {
         return "redirect:/restaurant/dashboard";
     }
 
+    /**
+     * Records a purchase for a customer and applies points.
+     *
+     * @param accountId loyalty account id
+     * @param totalAmount total amount
+     * @param currency currency code
+     * @param purchaseNumber optional purchase number
+     * @param notes optional notes
+     * @param description optional description
+     * @param redirectAttributes redirect flash messages
+     * @return redirect target
+     */
     @PostMapping("/purchases")
     public String createPurchase(@RequestParam("accountId") Long accountId,
                                  @RequestParam("totalAmount") BigDecimal totalAmount,
