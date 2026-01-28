@@ -23,7 +23,7 @@ import java.time.Instant;
 @Table(name = "redemption", indexes = {
         @Index(name = "idx_redemption_account", columnList = "loyalty_account_id"),
         @Index(name = "idx_redemption_reward", columnList = "reward_id"),
-        @Index(name = "idx_redemption_branch", columnList = "branch_id")
+        @Index(name = "idx_redemption_restaurant", columnList = "restaurant_id")
 })
 public class Redemption {
 
@@ -46,8 +46,8 @@ public class Redemption {
     private Reward reward;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "branch_id", nullable = false)
-    private Branch branch;
+    @JoinColumn(name = "restaurant_id", nullable = false)
+    private Restaurant restaurant;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "ledger_entry_id", nullable = false, unique = true)
@@ -71,6 +71,11 @@ public class Redemption {
     @Column(name = "points_spent", nullable = false)
     private Long pointsSpent;
 
+    @NotNull
+    @Size(min = 8, max = 12)
+    @Column(name = "redemption_code", nullable = false, length = 12, unique = true)
+    private String redemptionCode;
+
     public Long getId() {
         return id;
     }
@@ -91,12 +96,12 @@ public class Redemption {
         this.reward = reward;
     }
 
-    public Branch getBranch() {
-        return branch;
+    public Restaurant getRestaurant() {
+        return restaurant;
     }
 
-    public void setBranch(Branch branch) {
-        this.branch = branch;
+    public void setRestaurant(Restaurant restaurant) {
+        this.restaurant = restaurant;
     }
 
     public PointLedger getLedgerEntry() {
@@ -137,5 +142,13 @@ public class Redemption {
 
     public void setPointsSpent(Long pointsSpent) {
         this.pointsSpent = pointsSpent;
+    }
+
+    public String getRedemptionCode() {
+        return redemptionCode;
+    }
+
+    public void setRedemptionCode(String redemptionCode) {
+        this.redemptionCode = redemptionCode;
     }
 }
