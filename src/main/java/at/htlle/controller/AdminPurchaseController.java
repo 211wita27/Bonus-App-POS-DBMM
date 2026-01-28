@@ -23,17 +23,17 @@ public class AdminPurchaseController {
 
     @GetMapping("/admin/purchases")
     public String purchaseForm(@RequestParam(name = "accountId", required = false) Long accountId,
-                               @RequestParam(name = "branchId", required = false) Long branchId,
+                               @RequestParam(name = "restaurantId", required = false) Long restaurantId,
                                Model model) {
         model.addAttribute("accountId", accountId != null ? accountId : 1L);
-        model.addAttribute("branchId", branchId != null ? branchId : 1L);
+        model.addAttribute("restaurantId", restaurantId != null ? restaurantId : 1L);
         model.addAttribute("currency", "EUR");
         return "purchase";
     }
 
     @PostMapping("/admin/purchases")
     public String createPurchase(@RequestParam("accountId") Long accountId,
-                                 @RequestParam("branchId") Long branchId,
+                                 @RequestParam("restaurantId") Long restaurantId,
                                  @RequestParam("purchaseNumber") String purchaseNumber,
                                  @RequestParam("totalAmount") BigDecimal totalAmount,
                                  @RequestParam(name = "currency", defaultValue = "EUR") String currency,
@@ -43,7 +43,7 @@ public class AdminPurchaseController {
         String normalizedCurrency = currency.trim().toUpperCase(Locale.ROOT);
         PurchaseRequest payload = new PurchaseRequest(
                 accountId,
-                branchId,
+                restaurantId,
                 purchaseNumber,
                 totalAmount,
                 normalizedCurrency,
@@ -53,7 +53,7 @@ public class AdminPurchaseController {
                 null);
 
         model.addAttribute("accountId", accountId);
-        model.addAttribute("branchId", branchId);
+        model.addAttribute("restaurantId", restaurantId);
         model.addAttribute("currency", normalizedCurrency);
 
         try {
@@ -65,7 +65,7 @@ public class AdminPurchaseController {
                     ledger.getPurchase().getCurrency(),
                     ledger.getPurchase().getPurchasedAt(),
                     ledger.getLoyaltyAccount().getId(),
-                    ledger.getPurchase().getBranch().getId(),
+                    ledger.getPurchase().getRestaurant().getId(),
                     ledger.getId(),
                     ledger.getPoints(),
                     ledger.getBalanceAfter());

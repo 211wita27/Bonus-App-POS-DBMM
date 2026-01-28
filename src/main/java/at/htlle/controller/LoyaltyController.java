@@ -48,7 +48,7 @@ public class LoyaltyController {
                 purchase.getCurrency(),
                 purchase.getPurchasedAt(),
                 ledger.getLoyaltyAccount().getId(),
-                purchase.getBranch().getId(),
+                purchase.getRestaurant().getId(),
                 ledger.getId(),
                 ledger.getPoints(),
                 ledger.getBalanceAfter());
@@ -65,9 +65,10 @@ public class LoyaltyController {
                 redemption.getId(),
                 redemption.getLoyaltyAccount().getId(),
                 redemption.getReward().getId(),
-                redemption.getBranch().getId(),
+                redemption.getRestaurant().getId(),
                 ledger.getId(),
                 redemption.getPointsSpent(),
+                redemption.getRedemptionCode(),
                 ledger.getBalanceAfter(),
                 redemption.getStatus(),
                 redemption.getRedeemedAt());

@@ -1,11 +1,7 @@
 # ===============================
 # Java / Maven
 # ===============================
-
-# Compiled class files
 *.class
-
-# Build output
 /target/
 
 # Maven internal files
@@ -16,8 +12,6 @@
 # Logs
 # ===============================
 *.log
-
-# JVM crash logs
 hs_err_pid*
 replay_pid*
 
@@ -35,11 +29,7 @@ replay_pid*
 # ===============================
 # IDEs
 # ===============================
-
-# VS Code
 .vscode/
-
-# IntelliJ IDEA
 .idea/
 *.iml
 
@@ -52,8 +42,10 @@ Thumbs.db
 # ===============================
 # Local runtime data
 # ===============================
-
-# Local H2 / app data
 /data/
 *.mv.db
 *.trace.db
+
+# Local tooling artifacts
+cp.txt
+hash.jsh

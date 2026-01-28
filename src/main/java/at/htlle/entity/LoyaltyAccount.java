@@ -1,6 +1,5 @@
 package at.htlle.entity;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -84,13 +83,13 @@ public class LoyaltyAccount {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    @OneToMany(mappedBy = "loyaltyAccount", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "loyaltyAccount", fetch = FetchType.LAZY)
     private List<Purchase> purchases = new ArrayList<>();
 
-    @OneToMany(mappedBy = "loyaltyAccount", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "loyaltyAccount", fetch = FetchType.LAZY)
     private List<PointLedger> ledgerEntries = new ArrayList<>();
 
-    @OneToMany(mappedBy = "loyaltyAccount", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "loyaltyAccount", fetch = FetchType.LAZY)
     private List<Redemption> redemptions = new ArrayList<>();
 
     @PrePersist

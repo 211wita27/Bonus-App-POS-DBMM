@@ -16,18 +16,18 @@ import at.htlle.repository.PurchaseRepository;
 import at.htlle.repository.RedemptionRepository;
 import at.htlle.repository.RestaurantRepository;
 import at.htlle.repository.RewardRepository;
+import jakarta.persistence.EntityNotFoundException;
+import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.security.SecureRandom;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Service
 public class LoyaltyService {
@@ -79,22 +79,26 @@ public class LoyaltyService {
             throw new IllegalArgumentException("Total amount must be greater than zero");
         }
 
+        Restaurant restaurant = restaurantRepository
+                .findById(request.restaurantId())
+                .orElseThrow(() -> new EntityNotFoundException("Restaurant not found"));
+        if (!restaurant.getId().equals(account.getRestaurant().getId())) {
+            throw new IllegalArgumentException("Restaurant does not match account");
+        }
+
         Purchase purchase = new Purchase();
         purchase.setLoyaltyAccount(account);
+        purchase.setRestaurant(restaurant);
         purchase.setPurchaseNumber(request.purchaseNumber());
         purchase.setCurrency(request.currency().trim().toUpperCase(Locale.ROOT));
         purchase.setTotalAmount(request.totalAmount());
         purchase.setPurchasedAt(Optional.ofNullable(request.purchasedAt()).orElse(Instant.now()));
         purchase.setNotes(request.notes());
 
-        Restaurant restaurant = restaurantRepository
-                .findById(request.restaurantId())
-                .orElseThrow(() -> new EntityNotFoundException("Restaurant not found"));
-        purchase.setRestaurant(restaurant);
-
         Purchase persisted = purchaseRepository.save(purchase);
 
         PointRule appliedRule;
+        ZoneId zoneId = resolveZoneId(restaurant);
         if (request.pointRuleId() != null) {
             appliedRule = pointRuleRepository
                     .findById(request.pointRuleId())
@@ -102,13 +106,13 @@ public class LoyaltyService {
             if (!appliedRule.getRestaurant().getId().equals(restaurant.getId())) {
                 throw new IllegalArgumentException("Point rule does not belong to restaurant");
             }
-            if (!pointCalculator.isRuleActive(appliedRule, persisted.getPurchasedAt())) {
+            if (!pointCalculator.isRuleActive(appliedRule, persisted.getPurchasedAt(), zoneId)) {
                 throw new IllegalStateException("Point rule is not active");
             }
         } else {
             List<PointRule> candidates = pointRuleRepository.findActiveRulesForDate(
                     restaurant.getId(),
-                    LocalDate.ofInstant(persisted.getPurchasedAt(), java.time.ZoneId.systemDefault()));
+                    LocalDate.ofInstant(persisted.getPurchasedAt(), zoneId));
             appliedRule = candidates.stream()
                     .sorted(Comparator
                             .comparing(PointRule::getValidFrom, Comparator.nullsLast(Comparator.naturalOrder()))
@@ -135,7 +139,6 @@ public class LoyaltyService {
         ledger.setPointRule(appliedRule);
 
         account.setCurrentPoints(newBalance);
-
         loyaltyAccountRepository.save(account);
         return pointLedgerRepository.save(ledger);
     }
@@ -160,7 +163,11 @@ public class LoyaltyService {
         if (!reward.getRestaurant().getId().equals(restaurant.getId())) {
             throw new IllegalArgumentException("Reward does not belong to restaurant");
         }
-        LocalDate today = LocalDate.now();
+        if (!restaurant.getId().equals(account.getRestaurant().getId())) {
+            throw new IllegalArgumentException("Restaurant does not match account");
+        }
+
+        LocalDate today = LocalDate.now(resolveZoneId(restaurant));
         if (reward.getValidFrom() != null && reward.getValidFrom().isAfter(today)) {
             throw new IllegalStateException("Reward not yet valid");
         }
@@ -232,5 +239,16 @@ public class LoyaltyService {
             builder.append(REDEMPTION_CODE_CHARS.charAt(index));
         }
         return builder.toString();
+    }
+
+    private ZoneId resolveZoneId(Restaurant restaurant) {
+        if (restaurant == null || restaurant.getTimezone() == null) {
+            return ZoneId.systemDefault();
+        }
+        try {
+            return ZoneId.of(restaurant.getTimezone());
+        } catch (Exception ex) {
+            return ZoneId.systemDefault();
+        }
     }
 }

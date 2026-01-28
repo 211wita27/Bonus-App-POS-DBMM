@@ -4,13 +4,11 @@ import at.htlle.dto.AccountResponse;
 import at.htlle.dto.RedemptionRequest;
 import at.htlle.dto.RedemptionResponse;
 import at.htlle.entity.AppUser;
-import at.htlle.entity.Branch;
 import at.htlle.entity.LoyaltyAccount;
 import at.htlle.entity.Reward;
 import at.htlle.service.AccountService;
 import at.htlle.service.CurrentUserService;
 import at.htlle.service.LoyaltyService;
-import at.htlle.repository.BranchRepository;
 import at.htlle.repository.RewardRepository;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -30,18 +28,15 @@ public class CustomerRewardController {
     private final CurrentUserService currentUserService;
     private final LoyaltyService loyaltyService;
     private final RewardRepository rewardRepository;
-    private final BranchRepository branchRepository;
 
     public CustomerRewardController(AccountService accountService,
                                     CurrentUserService currentUserService,
                                     LoyaltyService loyaltyService,
-                                    RewardRepository rewardRepository,
-                                    BranchRepository branchRepository) {
+                                    RewardRepository rewardRepository) {
         this.accountService = accountService;
         this.currentUserService = currentUserService;
         this.loyaltyService = loyaltyService;
         this.rewardRepository = rewardRepository;
-        this.branchRepository = branchRepository;
     }
 
     @GetMapping("/customer/rewards")
@@ -60,23 +55,17 @@ public class CustomerRewardController {
         LoyaltyAccount selected = selectAccount(accounts, accountId);
         AccountResponse accountResponse = accountService.buildAccountResponse(selected, false);
         List<RewardCard> rewardCards = buildRewardCards(selected);
-        List<Branch> branches = branchRepository.findByRestaurantId(selected.getRestaurant().getId());
-        if (branches.isEmpty()) {
-            model.addAttribute("errorMessage", "No branches configured for this restaurant.");
-        }
 
         model.addAttribute("accounts", accounts);
         model.addAttribute("account", accountResponse);
         model.addAttribute("accountId", selected.getId());
         model.addAttribute("rewardCards", rewardCards);
-        model.addAttribute("branches", branches);
         return "rewards";
     }
 
     @PostMapping("/customer/rewards/redeem")
     public String redeem(@RequestParam("accountId") Long accountId,
                          @RequestParam("rewardId") Long rewardId,
-                         @RequestParam("branchId") Long branchId,
                          @RequestParam(name = "notes", required = false) String notes,
                          Model model) {
         AppUser user = currentUserService.getCurrentUser();
@@ -91,7 +80,7 @@ public class CustomerRewardController {
                 .orElseThrow(() -> new IllegalArgumentException("Invalid account selection"));
 
         try {
-            RedemptionRequest payload = new RedemptionRequest(account.getId(), rewardId, branchId, notes);
+            RedemptionRequest payload = new RedemptionRequest(account.getId(), rewardId, account.getRestaurant().getId(), notes);
             RedemptionResponse response = toResponse(loyaltyService.redeemReward(payload));
             model.addAttribute("redemption", response);
             model.addAttribute("accountId", account.getId());
@@ -143,9 +132,10 @@ public class CustomerRewardController {
                 redemption.getId(),
                 redemption.getLoyaltyAccount().getId(),
                 redemption.getReward().getId(),
-                redemption.getBranch().getId(),
+                redemption.getRestaurant().getId(),
                 redemption.getLedgerEntry().getId(),
                 redemption.getPointsSpent(),
+                redemption.getRedemptionCode(),
                 redemption.getLedgerEntry().getBalanceAfter(),
                 redemption.getStatus(),
                 redemption.getRedeemedAt());

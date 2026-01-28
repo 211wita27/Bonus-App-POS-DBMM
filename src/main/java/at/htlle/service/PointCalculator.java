@@ -28,11 +28,15 @@ public class PointCalculator {
     }
 
     public boolean isRuleActive(PointRule rule, Instant purchasedAt) {
+        return isRuleActive(rule, purchasedAt, ZoneId.systemDefault());
+    }
+
+    public boolean isRuleActive(PointRule rule, Instant purchasedAt, ZoneId zoneId) {
         Objects.requireNonNull(rule, "rule");
         if (!rule.isActive()) {
             return false;
         }
-        LocalDate referenceDate = toReferenceDate(purchasedAt);
+        LocalDate referenceDate = toReferenceDate(purchasedAt, zoneId);
         if (rule.getValidFrom() != null && rule.getValidFrom().isAfter(referenceDate)) {
             return false;
         }
@@ -51,8 +55,9 @@ public class PointCalculator {
         return units.multiply(multiplier);
     }
 
-    private LocalDate toReferenceDate(Instant purchasedAt) {
+    private LocalDate toReferenceDate(Instant purchasedAt, ZoneId zoneId) {
         Instant reference = purchasedAt != null ? purchasedAt : Instant.now();
-        return reference.atZone(ZoneId.systemDefault()).toLocalDate();
+        ZoneId resolvedZone = zoneId != null ? zoneId : ZoneId.systemDefault();
+        return reference.atZone(resolvedZone).toLocalDate();
     }
 }

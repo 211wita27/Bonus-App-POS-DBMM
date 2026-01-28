@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.time.ZoneId;
 import org.junit.jupiter.api.Test;
 
 class PointCalculatorTest {
@@ -54,6 +55,16 @@ class PointCalculatorTest {
 
         Instant reference = Instant.parse("2025-01-10T00:00:00Z");
         assertThat(pointCalculator.isRuleActive(rule, reference)).isFalse();
+    }
+
+    @Test
+    void isRuleActiveUsesProvidedZone() {
+        PointRule rule = baseRule(PointRule.RuleType.MULTIPLIER, new BigDecimal("1.00"), new BigDecimal("1.00"), 0);
+        rule.setValidUntil(LocalDate.of(2025, 1, 1));
+
+        Instant lateUtc = Instant.parse("2025-01-01T23:30:00Z");
+        assertThat(pointCalculator.isRuleActive(rule, lateUtc, ZoneId.of("UTC"))).isTrue();
+        assertThat(pointCalculator.isRuleActive(rule, lateUtc, ZoneId.of("Europe/Vienna"))).isFalse();
     }
 
     private PointRule baseRule(PointRule.RuleType ruleType, BigDecimal multiplier, BigDecimal threshold, int basePoints) {
