@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{auth-layout :: authLayout('Login', ~{::section})}">
-<section class="space-y-6">
+<section class="space-y-8">
     <div>
         <div class="text-sm uppercase tracking-[0.2em] text-ink/60">Welcome back</div>
         <div class="font-display text-3xl">Sign in</div>
@@ -23,7 +23,7 @@
         </div>
     </div>
 
-    <form class="space-y-4" th:action="@{/login}" method="post">
+    <form class="space-y-5" th:action="@{/login}" method="post">
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
         <div class="flex flex-col gap-2">
             <label class="text-xs uppercase tracking-[0.2em] text-ink/60" for="username">Email</label>

@@ -4,7 +4,7 @@
     <div class="card p-6 reveal">
         <div class="text-sm uppercase tracking-[0.2em] text-ink/60">Rewards &amp; Redemptions</div>
         <div class="font-display text-2xl">Rewards verwalten</div>
-        <p class="mt-2 text-sm text-ink/60">Rewards erstellen, bearbeiten und Einlösungen prüfen.</p>
+        <p class="mt-2 text-sm text-ink/60">Rewards erstellen, bearbeiten und Einloesungen pruefen.</p>
     </div>
 
     <div class="card p-6 reveal space-y-6">
@@ -26,7 +26,7 @@
                 <tbody>
                 <tr th:each="reward : ${rewards}" class="border-t border-ink/10">
                     <td class="py-3 pr-4">
-                        <select class="input" name="restaurantId" th:attr="form='reward-' + ${reward.id}">
+                        <select class="input table-input" name="restaurantId" th:attr="form='reward-' + ${reward.id}">
                             <option th:each="restaurant : ${restaurants}"
                                     th:value="${restaurant.id}"
                                     th:selected="${restaurant.id == reward.restaurant.id}"
@@ -34,18 +34,19 @@
                         </select>
                     </td>
                     <td class="py-3 pr-4">
-                        <input class="input" name="rewardCode" th:attr="form='reward-' + ${reward.id}"
+                        <input class="input table-input" name="rewardCode" th:attr="form='reward-' + ${reward.id}"
                                th:value="${reward.rewardCode}">
                     </td>
                     <td class="py-3 pr-4">
-                        <input class="input" name="name" th:attr="form='reward-' + ${reward.id}" th:value="${reward.name}">
+                        <input class="input table-input" name="name" th:attr="form='reward-' + ${reward.id}"
+                               th:value="${reward.name}">
                     </td>
                     <td class="py-3 pr-4">
-                        <input class="input" name="description" th:attr="form='reward-' + ${reward.id}"
+                        <input class="input table-input table-input-wide" name="description" th:attr="form='reward-' + ${reward.id}"
                                th:value="${reward.description}">
                     </td>
                     <td class="py-3 pr-4">
-                        <input class="input" name="costPoints" type="number" min="0"
+                        <input class="input table-input" name="costPoints" type="number" min="0"
                                th:attr="form='reward-' + ${reward.id}"
                                th:value="${reward.costPoints}">
                     </td>
@@ -66,18 +67,18 @@
             </table>
         </div>
 
-        <form class="grid gap-4 md:grid-cols-6" action="/admin/rewards/create" method="post">
+        <form class="grid gap-4 md:grid-cols-2 lg:grid-cols-6" action="/admin/rewards/create" method="post">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-            <select class="input md:col-span-2" name="restaurantId" required>
+            <select class="input lg:col-span-2" name="restaurantId" required>
                 <option value="" disabled selected>Select restaurant</option>
                 <option th:each="restaurant : ${restaurants}" th:value="${restaurant.id}" th:text="${restaurant.name}">Restaurant</option>
             </select>
             <input class="input" name="rewardCode" placeholder="Reward code" required>
             <input class="input" name="name" placeholder="Reward name" required>
-            <input class="input" name="description" placeholder="Description" required>
-            <div class="flex items-center gap-3">
-                <input class="input" name="costPoints" type="number" min="0" placeholder="Points" required>
-                <label class="text-sm text-ink/60 flex items-center gap-2">
+            <input class="input lg:col-span-2" name="description" placeholder="Description" required>
+            <div class="flex flex-wrap items-center gap-3 lg:col-span-2">
+                <input class="input input-compact" name="costPoints" type="number" min="0" placeholder="Points" required>
+                <label class="text-sm text-ink/60 flex items-center gap-2 whitespace-nowrap">
                     <input type="checkbox" name="active" checked>
                     Active
                 </label>
@@ -117,3 +118,5 @@
     </div>
 </section>
 </html>
+
+

@@ -31,17 +31,17 @@
                 <tbody>
                 <tr th:each="restaurant : ${restaurants}" class="border-t border-ink/10">
                     <td class="py-3 pr-4">
-                        <input class="input" type="text" name="name"
+                        <input class="input table-input" type="text" name="name"
                                th:attr="form='restaurant-' + ${restaurant.id}"
                                th:value="${restaurant.name}">
                     </td>
                     <td class="py-3 pr-4">
-                        <input class="input" type="text" name="code"
+                        <input class="input table-input" type="text" name="code"
                                th:attr="form='restaurant-' + ${restaurant.id}"
                                th:value="${restaurant.code}">
                     </td>
                     <td class="py-3 pr-4">
-                        <input class="input" type="text" name="defaultCurrency"
+                        <input class="input table-input" type="text" name="defaultCurrency"
                                th:attr="form='restaurant-' + ${restaurant.id}"
                                th:value="${restaurant.defaultCurrency}">
                     </td>
@@ -126,7 +126,7 @@
                 <tbody>
                 <tr th:each="branch : ${branches}" class="border-t border-ink/10">
                     <td class="py-3 pr-4">
-                        <select class="input" name="restaurantId" th:attr="form='branch-' + ${branch.id}">
+                        <select class="input table-input" name="restaurantId" th:attr="form='branch-' + ${branch.id}">
                             <option th:each="restaurant : ${restaurants}"
                                     th:value="${restaurant.id}"
                                     th:selected="${restaurant.id == branch.restaurant.id}"
@@ -134,11 +134,11 @@
                         </select>
                     </td>
                     <td class="py-3 pr-4">
-                        <input class="input" name="branchCode" th:attr="form='branch-' + ${branch.id}"
+                        <input class="input table-input" name="branchCode" th:attr="form='branch-' + ${branch.id}"
                                th:value="${branch.branchCode}">
                     </td>
                     <td class="py-3 pr-4">
-                        <input class="input" name="name" th:attr="form='branch-' + ${branch.id}"
+                        <input class="input table-input" name="name" th:attr="form='branch-' + ${branch.id}"
                                th:value="${branch.name}">
                     </td>
                     <td class="py-3 pr-4">

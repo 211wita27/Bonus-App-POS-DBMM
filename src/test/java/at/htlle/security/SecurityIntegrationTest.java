@@ -29,7 +29,7 @@ class SecurityIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "max.muster@example.com", roles = "CUSTOMER")
+    @WithMockUser(username = "user@user", roles = "CUSTOMER")
     void customerCannotAccessAdminArea() throws Exception {
         mockMvc.perform(get("/customer/dashboard"))
                 .andExpect(status().isOk());
@@ -38,7 +38,7 @@ class SecurityIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "admin@bonusapp.local", roles = "ADMIN")
+    @WithMockUser(username = "admin@admin", roles = "ADMIN")
     void adminCannotAccessCustomerArea() throws Exception {
         mockMvc.perform(get("/admin/dashboard"))
                 .andExpect(status().isOk());

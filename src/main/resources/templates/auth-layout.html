@@ -26,9 +26,9 @@
     <link rel="stylesheet" href="/app.css">
 </head>
 <body class="app-bg text-ink">
-<main class="min-h-screen flex items-center justify-center px-6 py-12">
-    <div class="auth-shell w-full max-w-3xl grid gap-6 lg:grid-cols-[1.1fr,1fr]">
-        <div class="auth-panel p-8 lg:p-10 flex flex-col justify-between">
+<main class="min-h-screen flex items-center justify-center px-6 py-16">
+    <div class="auth-shell w-full max-w-5xl grid gap-8 lg:grid-cols-[1.2fr,1fr]">
+        <div class="auth-panel p-10 lg:p-12 flex flex-col justify-between">
             <div>
                 <div class="text-xs uppercase tracking-[0.35em] text-ink/60">Bonus App</div>
                 <div class="mt-3 font-display text-3xl leading-tight">Loyalty, rewards, and restaurant insights.</div>
@@ -37,12 +37,13 @@
                 </p>
             </div>
             <div class="auth-badge mt-8 text-sm">
-                Multi-restaurant ready · Role-based access · Point ledger source of truth
+                Multi-restaurant ready - Role-based access - Point ledger source of truth
             </div>
         </div>
-        <div class="auth-card card p-8 lg:p-10" th:replace="${content}"></div>
+        <div class="auth-card card p-10 lg:p-12" th:replace="${content}"></div>
     </div>
 </main>
 <script src="/app.js"></script>
 </body>
 </html>
+
