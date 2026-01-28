@@ -62,6 +62,9 @@ public class Restaurant {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    @Column(name = "active", nullable = false)
+    private boolean active = true;
+
     @OneToMany(mappedBy = "restaurant", fetch = FetchType.LAZY)
     private List<Branch> branches = new ArrayList<>();
 
@@ -141,6 +144,14 @@ public class Restaurant {
 
     public Instant getUpdatedAt() {
         return updatedAt;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     public List<Branch> getBranches() {

@@ -59,10 +59,13 @@ public class UserService {
         customer.setFirstName(request.firstName().trim());
         customer.setLastName(request.lastName().trim());
         customer.setEmail(email);
+        customer.setUsername(generateUsername(email));
+        customer.setPassword(passwordEncoder.encode(request.password()));
         if (StringUtils.hasText(request.phoneNumber())) {
             customer.setPhoneNumber(request.phoneNumber().trim());
         }
         customer.setStatus(Customer.Status.ACTIVE);
+        customer.setRole(Customer.Role.USER);
         Customer savedCustomer = customerRepository.save(customer);
 
         loyaltyAccountRepository.findByCustomerIdAndRestaurantId(savedCustomer.getId(), restaurant.getId())
@@ -109,6 +112,26 @@ public class UserService {
         boolean hasLower = password.chars().anyMatch(Character::isLowerCase);
         boolean hasDigit = password.chars().anyMatch(Character::isDigit);
         return hasUpper && hasLower && hasDigit;
+    }
+
+    private String generateUsername(String email) {
+        String base = email.contains("@") ? email.substring(0, email.indexOf('@')) : email;
+        base = base.replaceAll("[^A-Za-z0-9._-]", "");
+        if (base.length() > 50) {
+            base = base.substring(0, 50);
+        }
+        String candidate = base;
+        int suffix = 1;
+        while (customerRepository.findByUsername(candidate).isPresent()) {
+            String extra = String.valueOf(suffix++);
+            int maxBase = Math.max(1, 60 - extra.length());
+            String trimmed = base.length() > maxBase ? base.substring(0, maxBase) : base;
+            candidate = trimmed + extra;
+        }
+        if (!StringUtils.hasText(candidate)) {
+            candidate = "user" + System.currentTimeMillis();
+        }
+        return candidate;
     }
 
     private String generateAccountNumber() {

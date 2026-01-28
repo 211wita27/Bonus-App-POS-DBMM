@@ -21,7 +21,7 @@ public class AdminPurchaseController {
         this.loyaltyService = loyaltyService;
     }
 
-    @GetMapping("/admin/purchases")
+    @GetMapping("/admin/purchases/new")
     public String purchaseForm(@RequestParam(name = "accountId", required = false) Long accountId,
                                @RequestParam(name = "restaurantId", required = false) Long restaurantId,
                                Model model) {
@@ -31,7 +31,7 @@ public class AdminPurchaseController {
         return "purchase";
     }
 
-    @PostMapping("/admin/purchases")
+    @PostMapping("/admin/purchases/new")
     public String createPurchase(@RequestParam("accountId") Long accountId,
                                  @RequestParam("restaurantId") Long restaurantId,
                                  @RequestParam("purchaseNumber") String purchaseNumber,

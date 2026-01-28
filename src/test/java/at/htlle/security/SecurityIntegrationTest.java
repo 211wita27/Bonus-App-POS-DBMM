@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.test.context.support.WithUserDetails;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest
@@ -29,7 +29,7 @@ class SecurityIntegrationTest {
     }
 
     @Test
-    @WithUserDetails("max.muster@example.com")
+    @WithMockUser(username = "max.muster@example.com", roles = "CUSTOMER")
     void customerCannotAccessAdminArea() throws Exception {
         mockMvc.perform(get("/customer/dashboard"))
                 .andExpect(status().isOk());
@@ -38,7 +38,7 @@ class SecurityIntegrationTest {
     }
 
     @Test
-    @WithUserDetails("admin@bonusapp.local")
+    @WithMockUser(username = "admin@bonusapp.local", roles = "ADMIN")
     void adminCannotAccessCustomerArea() throws Exception {
         mockMvc.perform(get("/admin/dashboard"))
                 .andExpect(status().isOk());

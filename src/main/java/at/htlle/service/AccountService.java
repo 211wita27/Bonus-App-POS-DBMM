@@ -46,6 +46,8 @@ public class AccountService {
                 account.getId(),
                 account.getAccountNumber(),
                 account.getCustomer().getId(),
+                account.getCustomer().getFirstName(),
+                account.getCustomer().getLastName(),
                 account.getRestaurant().getId(),
                 account.getStatus(),
                 account.getTier(),
@@ -65,6 +67,7 @@ public class AccountService {
                 entry.getDescription(),
                 entry.getPurchase() != null ? entry.getPurchase().getId() : null,
                 entry.getPointRule() != null ? entry.getPointRule().getId() : null,
-                entry.getRedemption() != null ? entry.getRedemption().getId() : null);
+                entry.getRedemption() != null ? entry.getRedemption().getId() : null,
+                entry.getRedemption() != null ? entry.getRedemption().getRedemptionCode() : null);
     }
 }
