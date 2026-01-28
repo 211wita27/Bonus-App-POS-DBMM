@@ -454,6 +454,12 @@ form.is-loading button[type="submit"]::after {
   font-size: 0.78rem;
 }
 
+.phone-ui .stat-pill {
+  padding: 0.2rem 0.6rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+}
+
 .phone-ui .btn-primary {
   padding: 0.55rem 1.1rem;
   font-size: 0.9rem;
@@ -474,15 +480,23 @@ form.is-loading button[type="submit"]::after {
 }
 
 .phone-ui .card.p-6 {
-  padding: 1.25rem;
+  padding: 1rem;
+}
+
+.phone-ui .text-2xl {
+  font-size: 1.15rem;
+}
+
+.phone-ui .text-xl {
+  font-size: 1.05rem;
 }
 
 .phone-ui .points-big {
-  font-size: clamp(2rem, 8vw, 2.6rem);
+  font-size: clamp(1.9rem, 7vw, 2.4rem);
 }
 
 .phone-ui .space-y-8 > :not([hidden]) ~ :not([hidden]) {
-  margin-top: 1.5rem;
+  margin-top: 1.2rem;
 }
 
 .phone-ui .py-10 {
