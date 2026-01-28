@@ -418,6 +418,97 @@ form.is-loading button[type="submit"]::after {
   margin: 12px auto 14px;
 }
 
+.phone-ui .phone-screen {
+  font-size: 0.93rem;
+}
+
+.phone-ui .phone-header {
+  padding-top: 16px;
+  padding-bottom: 12px;
+  gap: 12px;
+}
+
+.phone-ui .phone-title .text-sm {
+  font-size: 0.62rem;
+}
+
+.phone-ui .phone-title .text-2xl {
+  font-size: 1.3rem;
+}
+
+.phone-ui .phone-nav {
+  width: 100%;
+  gap: 8px;
+}
+
+.phone-ui .phone-nav-links {
+  justify-content: center;
+}
+
+.phone-ui .phone-user-row {
+  justify-content: center;
+}
+
+.phone-ui .nav-chip {
+  padding: 0.3rem 0.8rem;
+  font-size: 0.78rem;
+}
+
+.phone-ui .btn-primary {
+  padding: 0.55rem 1.1rem;
+  font-size: 0.9rem;
+}
+
+.phone-ui .btn-secondary {
+  padding: 0.45rem 0.9rem;
+  font-size: 0.8rem;
+}
+
+.phone-ui .input {
+  padding: 0.6rem 0.8rem;
+  border-radius: 12px;
+}
+
+.phone-ui .card {
+  border-radius: 18px;
+}
+
+.phone-ui .card.p-6 {
+  padding: 1.25rem;
+}
+
+.phone-ui .points-big {
+  font-size: clamp(2rem, 8vw, 2.6rem);
+}
+
+.phone-ui .space-y-8 > :not([hidden]) ~ :not([hidden]) {
+  margin-top: 1.5rem;
+}
+
+.phone-ui .py-10 {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+.phone-ui .py-6 {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.phone-ui .px-6 {
+  padding-left: 1.1rem;
+  padding-right: 1.1rem;
+}
+
+.phone-ui .auth-shell {
+  gap: 1.5rem;
+}
+
+.phone-ui .auth-panel,
+.phone-ui .auth-card {
+  padding: 1.5rem;
+}
+
 @media (max-width: 640px) {
   .phone-shell {
     padding: 0;
