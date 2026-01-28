@@ -35,7 +35,7 @@
             </div>
             <nav class="flex flex-wrap gap-3 items-center">
                 <a class="nav-chip" href="/restaurant/dashboard">Dashboard</a>
-                <a class="nav-chip" href="/restaurant/dashboard#purchase-form">Neuer Kauf</a>
+                <a class="nav-chip" href="/restaurant/dashboard#purchase-form">New Purchase</a>
                 <form action="/logout" method="post">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                     <button class="nav-chip" type="submit">Logout</button>
@@ -53,7 +53,7 @@
     <footer class="border-t border-ink/10">
         <div class="mx-auto max-w-7xl px-6 py-6 text-sm text-ink/60 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
             <span>Restaurant Operations</span>
-            <span>Manual purchase entry is tracked in the ledger</span>
+            <span>Manual entry is tracked, and purchases can also be created via the API.</span>
         </div>
     </footer>
 </div>

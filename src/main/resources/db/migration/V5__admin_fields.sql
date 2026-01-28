@@ -1,9 +1,9 @@
--- 1) Branch: default_branch Spalte anlegen (für Hibernate Entity Mapping)
+-- 1) Branch: add default_branch column (for Hibernate entity mapping)
 ALTER TABLE branch
 ADD COLUMN default_branch BOOLEAN NOT NULL DEFAULT FALSE;
 
--- Optional: Pro Restaurant genau eine Branch als default setzen (H2-kompatibel)
--- Setzt für jedes restaurant_id die Branch mit der kleinsten ID auf default_branch = TRUE
+-- Optional: keep exactly one default branch per restaurant (H2 compatible)
+-- Sets the smallest branch id per restaurant as default_branch = TRUE
 UPDATE branch b
 SET default_branch = TRUE
 WHERE b.id IN (
@@ -12,11 +12,11 @@ WHERE b.id IN (
     GROUP BY b2.restaurant_id
 );
 
--- 2) Customer: role Spalte anlegen (für Admin/User Login)
+-- 2) Customer: add role column (for admin/user login)
 ALTER TABLE customer
 ADD COLUMN role VARCHAR(20) NOT NULL DEFAULT 'USER';
 
--- Optional: bestehenden admin user auf ADMIN setzen (nur wenn er existiert)
+-- Optional: update existing admin user if present
 UPDATE customer
 SET role = 'ADMIN'
 WHERE username = 'admin';

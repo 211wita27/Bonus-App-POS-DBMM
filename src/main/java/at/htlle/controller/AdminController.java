@@ -92,7 +92,7 @@ public class AdminController {
     @GetMapping("/customers")
     public String customers(Model model) {
         List<Customer> customers = customerRepository.findAll().stream()
-                .sorted(Comparator.comparing(Customer::getId))
+                .sorted(Comparator.comparing(Customer::getId).reversed())
                 .toList();
         List<CustomerSummary> summaries = customers.stream()
                 .map(customer -> new CustomerSummary(customer, primaryAccount(customer.getId())))
@@ -128,13 +128,56 @@ public class AdminController {
         return "redirect:/admin/customers";
     }
 
+    @GetMapping("/customers/{id}")
+    public String customerDetail(@PathVariable("id") Long customerId, Model model) {
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new IllegalArgumentException("Customer not found"));
+        List<LoyaltyAccount> accounts = loyaltyAccountRepository.findByCustomerId(customerId).stream()
+                .sorted(Comparator.comparing(LoyaltyAccount::getId).reversed())
+                .toList();
+        model.addAttribute("customer", customer);
+        model.addAttribute("accounts", accounts);
+        return "admin-customer-detail";
+    }
+
+    @PostMapping("/customers/{id}/adjust")
+    public String adjustCustomerPoints(@PathVariable("id") Long customerId,
+                                       @RequestParam("accountId") Long accountId,
+                                       @RequestParam("pointsDelta") Long pointsDelta,
+                                       @RequestParam("reason") String reason,
+                                       RedirectAttributes redirectAttributes) {
+        adminManagementService.adjustPoints(accountId, pointsDelta, reason)
+                .ifPresent(message -> redirectAttributes.addFlashAttribute("errorMessage", message));
+        return "redirect:/admin/customers/" + customerId;
+    }
+
     @GetMapping("/ledger")
     public String ledger(Model model) {
         List<PointLedger> entries = pointLedgerRepository
                 .findAllByOrderByOccurredAtDescIdDesc(PageRequest.of(0, 200))
                 .getContent();
         model.addAttribute("entries", entries);
+        loadPointRules(model);
         return "admin-ledger";
+    }
+
+    @GetMapping("/adjustments")
+    public String adjustments(Model model) {
+        List<LoyaltyAccount> accounts = loyaltyAccountRepository.findAll().stream()
+                .sorted(Comparator.comparing(LoyaltyAccount::getId).reversed())
+                .toList();
+        model.addAttribute("accounts", accounts);
+        return "admin-adjustments";
+    }
+
+    @PostMapping("/adjustments")
+    public String applyAdjustment(@RequestParam("accountId") Long accountId,
+                                  @RequestParam("pointsDelta") Long pointsDelta,
+                                  @RequestParam("reason") String reason,
+                                  RedirectAttributes redirectAttributes) {
+        adminManagementService.adjustPoints(accountId, pointsDelta, reason)
+                .ifPresent(message -> redirectAttributes.addFlashAttribute("errorMessage", message));
+        return "redirect:/admin/adjustments";
     }
 
     @PostMapping("/ledger/adjust")
@@ -144,7 +187,7 @@ public class AdminController {
                                RedirectAttributes redirectAttributes) {
         adminManagementService.adjustPoints(accountId, pointsDelta, reason)
                 .ifPresent(message -> redirectAttributes.addFlashAttribute("errorMessage", message));
-        return "redirect:/admin/ledger";
+        return "redirect:/admin/adjustments";
     }
 
     @GetMapping("/purchases")
@@ -156,12 +199,23 @@ public class AdminController {
 
     @GetMapping("/rewards")
     public String rewards(Model model) {
-        List<Reward> rewards = rewardRepository.findAll().stream()
-                .sorted(Comparator.comparing(Reward::getName, Comparator.nullsLast(String::compareToIgnoreCase)))
-                .toList();
         List<Restaurant> restaurants = restaurantRepository.findAll().stream()
-                .sorted(Comparator.comparing(Restaurant::getName, Comparator.nullsLast(String::compareToIgnoreCase)))
+                .sorted(Comparator.comparing(Restaurant::getId).reversed())
                 .toList();
+        List<Reward> rewards = rewardRepository.findAll().stream()
+                .sorted(Comparator.comparing(Reward::getId).reversed())
+                .toList();
+        java.util.Map<Long, java.util.List<Reward>> rewardsByRestaurant = new java.util.HashMap<>();
+        for (Restaurant restaurant : restaurants) {
+            rewardsByRestaurant.put(restaurant.getId(), new java.util.ArrayList<>());
+        }
+        for (Reward reward : rewards) {
+            if (reward.getRestaurant() != null) {
+                rewardsByRestaurant
+                        .computeIfAbsent(reward.getRestaurant().getId(), key -> new java.util.ArrayList<>())
+                        .add(reward);
+            }
+        }
         List<AdminRedemptionSummary> redemptions = redemptionRepository.findAllByOrderByRedeemedAtDesc().stream()
                 .map(redemption -> new AdminRedemptionSummary(
                         redemption.getRedemptionCode(),
@@ -173,6 +227,7 @@ public class AdminController {
                         redemption.getRedeemedAt()))
                 .toList();
         model.addAttribute("rewards", rewards);
+        model.addAttribute("rewardsByRestaurant", rewardsByRestaurant);
         model.addAttribute("restaurants", restaurants);
         model.addAttribute("redemptions", redemptions);
         return "admin-rewards";
@@ -289,6 +344,7 @@ public class AdminController {
                                @RequestParam("name") String name,
                                @RequestParam("description") String description,
                                @RequestParam("costPoints") Integer costPoints,
+                               @RequestParam(name = "validUntil", required = false) java.time.LocalDate validUntil,
                                @RequestParam(name = "active", defaultValue = "false") boolean active) {
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new IllegalArgumentException("Restaurant not found"));
@@ -299,6 +355,8 @@ public class AdminController {
         reward.setDescription(description.trim());
         reward.setCostPoints(costPoints);
         reward.setActive(active);
+        reward.setValidFrom(java.time.LocalDate.now());
+        reward.setValidUntil(validUntil);
         rewardRepository.save(reward);
         return "redirect:/admin";
     }
@@ -310,6 +368,7 @@ public class AdminController {
                                @RequestParam("name") String name,
                                @RequestParam("description") String description,
                                @RequestParam("costPoints") Integer costPoints,
+                               @RequestParam(name = "validUntil", required = false) java.time.LocalDate validUntil,
                                @RequestParam(name = "active", defaultValue = "false") boolean active) {
         Reward reward = rewardRepository.findById(rewardId)
                 .orElseThrow(() -> new IllegalArgumentException("Reward not found"));
@@ -321,6 +380,7 @@ public class AdminController {
         reward.setDescription(description.trim());
         reward.setCostPoints(costPoints);
         reward.setActive(active);
+        reward.setValidUntil(validUntil);
         rewardRepository.save(reward);
         return "redirect:/admin";
     }
@@ -344,7 +404,7 @@ public class AdminController {
                     }
                     return true;
                 })
-                .sorted(Comparator.comparing(Restaurant::getName, Comparator.nullsLast(String::compareToIgnoreCase)))
+                .sorted(Comparator.comparing(Restaurant::getId).reversed())
                 .toList();
         List<Branch> branches = branchRepository.findAll().stream()
                 .filter(branch -> {
@@ -358,7 +418,7 @@ public class AdminController {
                     }
                     return true;
                 })
-                .sorted(Comparator.comparing(Branch::getName, Comparator.nullsLast(String::compareToIgnoreCase)))
+                .sorted(Comparator.comparing(Branch::getId).reversed())
                 .toList();
         List<Reward> rewards = rewardRepository.findAll().stream()
                 .filter(reward -> {
@@ -372,40 +432,35 @@ public class AdminController {
                     }
                     return true;
                 })
-                .sorted(Comparator.comparing(Reward::getName, Comparator.nullsLast(String::compareToIgnoreCase)))
+                .sorted(Comparator.comparing(Reward::getId).reversed())
                 .toList();
-
-        Map<Long, PointRule> defaultRules = new java.util.HashMap<>();
-        for (Restaurant restaurant : restaurants) {
-            if (restaurant == null) {
-                logger.warn("Skipping null restaurant when building default point rules");
-                continue;
-            }
-            Long restaurantId = restaurant.getId();
-            if (restaurantId == null) {
-                logger.warn("Skipping restaurant with null id when building default point rules. name={}",
-                        restaurant.getName());
-                continue;
-            }
-            PointRule rule = pointRuleRepository
-                    .findByRestaurantIdAndName(restaurantId, DEFAULT_POINT_RULE_NAME)
-                    .orElse(null);
-            if (defaultRules.containsKey(restaurantId)) {
-                logger.warn("Duplicate restaurant id {} when building default point rules", restaurantId);
-                continue;
-            }
-            defaultRules.put(restaurantId, rule);
-        }
 
         model.addAttribute("restaurants", restaurants);
         model.addAttribute("branches", branches);
         model.addAttribute("rewards", rewards);
+    }
+
+    private void loadPointRules(Model model) {
+        List<Restaurant> restaurants = restaurantRepository.findAll().stream()
+                .sorted(Comparator.comparing(Restaurant::getId).reversed())
+                .toList();
+        Map<Long, PointRule> defaultRules = new java.util.HashMap<>();
+        for (Restaurant restaurant : restaurants) {
+            if (restaurant == null || restaurant.getId() == null) {
+                continue;
+            }
+            PointRule rule = pointRuleRepository
+                    .findByRestaurantIdAndName(restaurant.getId(), DEFAULT_POINT_RULE_NAME)
+                    .orElse(null);
+            defaultRules.put(restaurant.getId(), rule);
+        }
+        model.addAttribute("restaurants", restaurants);
         model.addAttribute("defaultRules", defaultRules);
     }
 
     private LoyaltyAccount primaryAccount(Long customerId) {
-        return loyaltyAccountRepository.findByCustomerIdOrderByIdAsc(customerId).stream()
-                .findFirst()
+        return loyaltyAccountRepository.findByCustomerId(customerId).stream()
+                .max(Comparator.comparing(LoyaltyAccount::getId))
                 .orElse(null);
     }
 

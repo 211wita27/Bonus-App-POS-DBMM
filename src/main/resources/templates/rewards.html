@@ -10,10 +10,10 @@
         <div class="card p-6 reveal">
             <div class="text-sm uppercase tracking-[0.2em] text-ink/60">Current Points</div>
             <div class="points-big" th:text="${account != null ? account.currentPoints : 0}">0</div>
-            <form class="mt-4 flex gap-3 items-end" th:action="@{/customer/rewards}" method="get" data-loading>
+            <form class="mt-4 flex gap-3 items-end" th:action="@{/customer/rewards}" method="get">
                 <div class="flex flex-col gap-2">
                     <label class="text-xs uppercase tracking-[0.2em] text-ink/60" for="accountId">Restaurant</label>
-                    <select class="input" id="accountId" name="accountId">
+                    <select class="input" id="accountId" name="accountId" data-auto-submit>
                         <option th:each="acc : ${accounts}"
                                 th:value="${acc.id}"
                                 th:selected="${acc.id == accountId}"
@@ -22,7 +22,6 @@
                         </option>
                     </select>
                 </div>
-                <button class="btn-secondary" type="submit">Load</button>
             </form>
         </div>
     </div>

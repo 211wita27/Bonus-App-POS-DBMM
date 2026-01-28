@@ -14,6 +14,45 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  document.querySelectorAll("[data-auto-submit]").forEach((select) => {
+    select.addEventListener("change", () => {
+      const form = select.closest("form");
+      if (form) {
+        form.submit();
+      }
+    });
+  });
+
+  document.querySelectorAll("[data-search-input]").forEach((input) => {
+    const targetSelector = input.getAttribute("data-search-target");
+    if (!targetSelector) {
+      return;
+    }
+    const targetNodes = document.querySelectorAll(targetSelector);
+    if (!targetNodes.length) {
+      return;
+    }
+    const rows = [];
+    targetNodes.forEach((node) => {
+      if (node.tagName === "TR") {
+        rows.push(node);
+      } else if (node.tagName === "TBODY") {
+        rows.push(...node.querySelectorAll("tr"));
+      } else {
+        rows.push(...node.querySelectorAll("tr"));
+      }
+    });
+    const filterRows = () => {
+      const term = input.value.trim().toLowerCase();
+      rows.forEach((row) => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(term) ? "" : "none";
+      });
+    };
+    input.addEventListener("input", filterRows);
+    input.addEventListener("search", filterRows);
+  });
+
   const pointsHost = document.querySelector("[data-current-points]");
   const currentPoints = pointsHost ? Number(pointsHost.getAttribute("data-current-points")) : null;
   if (!Number.isNaN(currentPoints)) {

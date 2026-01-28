@@ -44,7 +44,9 @@ public class AdminDashboardController {
 
     @GetMapping("/admin/dashboard")
     public String dashboard(Model model) {
-        List<Restaurant> restaurants = restaurantRepository.findAll();
+        List<Restaurant> restaurants = restaurantRepository.findAll().stream()
+                .sorted(java.util.Comparator.comparing(Restaurant::getId).reversed())
+                .toList();
         Map<Long, Integer> branchCounts = new HashMap<>();
         for (Restaurant restaurant : restaurants) {
             branchCounts.put(restaurant.getId(),

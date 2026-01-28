@@ -16,9 +16,15 @@ public interface RewardRepository extends JpaRepository<Reward, Long> {
 
     List<Reward> findByRestaurantId(Long restaurantId);
 
+    List<Reward> findByRestaurantIdOrderByIdDesc(Long restaurantId);
+
     @Query("select r from Reward r where r.restaurant.id = :restaurantId and r.active = true " +
             "and (r.validFrom is null or r.validFrom <= :referenceDate) " +
             "and (r.validUntil is null or r.validUntil >= :referenceDate)")
     List<Reward> findActiveRewardsForDate(@Param("restaurantId") Long restaurantId,
                                           @Param("referenceDate") LocalDate referenceDate);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @Query("delete from Reward r where r.validUntil is not null and r.validUntil < :cutoff")
+    int deleteExpiredRewards(@Param("cutoff") LocalDate cutoff);
 }

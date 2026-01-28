@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout('Admin Dashboard', ~{::section})}">
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{admin-layout :: layout('Admin Dashboard', ~{::section})}">
 <section class="space-y-8">
     <div class="card p-6 reveal">
         <div class="text-sm uppercase tracking-[0.2em] text-ink/60">Admin</div>
@@ -34,15 +34,20 @@
         </div>
     </div>
 
-    <div class="card p-6 reveal">
-        <div class="text-sm uppercase tracking-[0.2em] text-ink/60">Restaurants</div>
-        <div class="mt-4 grid gap-3">
-            <div class="ledger-row" th:each="restaurant : ${restaurants}">
+    <div class="card p-6 reveal space-y-4">
+        <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div class="text-sm uppercase tracking-[0.2em] text-ink/60">Restaurants</div>
+            <div class="w-full md:w-72">
+                <input class="input" type="search" placeholder="Search restaurants" data-search-input data-search-target=".restaurant-row">
+            </div>
+        </div>
+        <div class="grid gap-3">
+            <div class="ledger-row restaurant-row" th:each="restaurant : ${restaurants}">
                 <div class="flex items-center justify-between">
                     <div>
                         <div class="font-semibold" th:text="${restaurant.name}">Restaurant</div>
                         <div class="text-xs text-ink/60">
-                            Code: <span th:text="${restaurant.code}">CODE</span> ·
+                            Code: <span th:text="${restaurant.code}">CODE</span> -
                             Timezone: <span th:text="${restaurant.timezone}">TZ</span>
                         </div>
                     </div>

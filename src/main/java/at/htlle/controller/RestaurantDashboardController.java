@@ -6,15 +6,18 @@ import at.htlle.entity.LoyaltyAccount;
 import at.htlle.entity.PointLedger;
 import at.htlle.entity.Purchase;
 import at.htlle.entity.Redemption;
+import at.htlle.entity.Reward;
 import at.htlle.entity.Restaurant;
 import at.htlle.repository.LoyaltyAccountRepository;
 import at.htlle.repository.PurchaseRepository;
 import at.htlle.repository.RedemptionRepository;
+import at.htlle.repository.RewardRepository;
 import at.htlle.service.CurrentUserService;
 import at.htlle.service.LoyaltyService;
 import jakarta.persistence.EntityNotFoundException;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -33,17 +36,20 @@ public class RestaurantDashboardController {
     private final LoyaltyAccountRepository loyaltyAccountRepository;
     private final PurchaseRepository purchaseRepository;
     private final RedemptionRepository redemptionRepository;
+    private final RewardRepository rewardRepository;
     private final LoyaltyService loyaltyService;
 
     public RestaurantDashboardController(CurrentUserService currentUserService,
                                          LoyaltyAccountRepository loyaltyAccountRepository,
                                          PurchaseRepository purchaseRepository,
                                          RedemptionRepository redemptionRepository,
+                                         RewardRepository rewardRepository,
                                          LoyaltyService loyaltyService) {
         this.currentUserService = currentUserService;
         this.loyaltyAccountRepository = loyaltyAccountRepository;
         this.purchaseRepository = purchaseRepository;
         this.redemptionRepository = redemptionRepository;
+        this.rewardRepository = rewardRepository;
         this.loyaltyService = loyaltyService;
     }
 
@@ -53,15 +59,43 @@ public class RestaurantDashboardController {
         List<LoyaltyAccount> accounts = loyaltyAccountRepository.findByRestaurantIdOrderByIdAsc(restaurant.getId());
         List<Purchase> purchases = purchaseRepository.findAllByRestaurantIdOrderByPurchasedAtDesc(restaurant.getId());
         List<Redemption> redemptions = redemptionRepository.findByRestaurantIdOrderByRedeemedAtDesc(restaurant.getId());
+        List<Reward> rewards = rewardRepository.findByRestaurantIdOrderByIdDesc(restaurant.getId());
 
         model.addAttribute("restaurant", restaurant);
         model.addAttribute("accounts", accounts);
         model.addAttribute("purchases", purchases.stream().limit(20).toList());
         model.addAttribute("redemptions", redemptions.stream().limit(20).toList());
+        model.addAttribute("rewards", rewards);
         model.addAttribute("customerCount", accounts.size());
         model.addAttribute("purchaseCount", purchases.size());
         model.addAttribute("redemptionCount", redemptions.size());
         return "restaurant-dashboard";
+    }
+
+    @PostMapping("/rewards")
+    public String createReward(@RequestParam("rewardCode") String rewardCode,
+                               @RequestParam("name") String name,
+                               @RequestParam("description") String description,
+                               @RequestParam("costPoints") Integer costPoints,
+                               @RequestParam(name = "validUntil", required = false) LocalDate validUntil,
+                               RedirectAttributes redirectAttributes) {
+        Restaurant restaurant = requireRestaurant();
+        try {
+            Reward reward = new Reward();
+            reward.setRestaurant(restaurant);
+            reward.setRewardCode(rewardCode.trim().toUpperCase());
+            reward.setName(name.trim());
+            reward.setDescription(description.trim());
+            reward.setCostPoints(costPoints);
+            reward.setValidFrom(LocalDate.now());
+            reward.setValidUntil(validUntil);
+            reward.setActive(true);
+            rewardRepository.save(reward);
+            redirectAttributes.addFlashAttribute("successMessage", "Reward created for " + restaurant.getName() + ".");
+        } catch (RuntimeException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/restaurant/dashboard";
     }
 
     @PostMapping("/purchases")
@@ -98,7 +132,7 @@ public class RestaurantDashboardController {
             PointLedger ledger = loyaltyService.recordPurchase(request);
             redirectAttributes.addFlashAttribute(
                     "successMessage",
-                    "Purchase recorded: +" + ledger.getPoints() + " Punkte fuer "
+                    "Purchase recorded: +" + ledger.getPoints() + " points for "
                             + account.getCustomer().getFirstName() + " " + account.getCustomer().getLastName());
         } catch (RuntimeException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());

@@ -4,52 +4,55 @@
     <div class="flex flex-col gap-6">
         <div class="card p-6 reveal">
             <div class="text-sm uppercase tracking-[0.2em] text-ink/60">Admin Dashboard</div>
-            <div class="font-display text-3xl">Übersicht &amp; Kontrolle</div>
-            <p class="mt-2 text-sm text-ink/60">Zentrale Übersicht über Kunden, Restaurants und Punktebewegungen.</p>
+            <div class="font-display text-3xl">Overview &amp; Control</div>
+            <p class="mt-2 text-sm text-ink/60">Central overview of customers, restaurants, and point activity.</p>
         </div>
 
         <div class="grid gap-6 md:grid-cols-3">
             <div class="card p-6 reveal">
-                <div class="text-sm uppercase tracking-[0.2em] text-ink/60">Kunden</div>
+                <div class="text-sm uppercase tracking-[0.2em] text-ink/60">Customers</div>
                 <div class="font-display text-3xl" th:text="${customerCount}">0</div>
-                <div class="text-xs text-ink/60 mt-2">Gesamtzahl registrierter Kunden</div>
+                <div class="text-xs text-ink/60 mt-2">Total registered customers</div>
             </div>
             <div class="card p-6 reveal">
                 <div class="text-sm uppercase tracking-[0.2em] text-ink/60">Restaurants</div>
                 <div class="font-display text-3xl" th:text="${restaurantCount}">0</div>
-                <div class="text-xs text-ink/60 mt-2">Aktive &amp; inaktive Restaurants</div>
+                <div class="text-xs text-ink/60 mt-2">Active and inactive restaurants</div>
             </div>
             <div class="card p-6 reveal">
-                <div class="text-sm uppercase tracking-[0.2em] text-ink/60">Punkte im Umlauf</div>
+                <div class="text-sm uppercase tracking-[0.2em] text-ink/60">Points in circulation</div>
                 <div class="font-display text-3xl" th:text="${pointsInCirculation}">0</div>
-                <div class="text-xs text-ink/60 mt-2">Summe aller aktuellen Punkte</div>
+                <div class="text-xs text-ink/60 mt-2">Total points currently issued</div>
             </div>
         </div>
     </div>
 
     <div class="card p-6 reveal space-y-4">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
             <div>
-                <div class="text-sm uppercase tracking-[0.2em] text-ink/60">Letzte Aktivitäten</div>
+                <div class="text-sm uppercase tracking-[0.2em] text-ink/60">Recent Activity</div>
                 <div class="font-display text-xl">Point Ledger</div>
             </div>
-            <a class="btn-secondary" href="/admin/ledger">Alle Ledger Einträge</a>
+            <a class="btn-secondary" href="/admin/ledger">All ledger entries</a>
+        </div>
+        <div class="w-full md:w-72">
+            <input class="input" type="search" placeholder="Search ledger entries" data-search-input data-search-target="#admin-home-ledger">
         </div>
 
         <div class="overflow-auto">
             <table class="min-w-full text-sm">
                 <thead>
                 <tr class="text-left text-ink/60 uppercase text-xs tracking-[0.2em]">
-                    <th class="py-2 pr-4">Zeitpunkt</th>
-                    <th class="py-2 pr-4">Kunde</th>
+                    <th class="py-2 pr-4">Timestamp</th>
+                    <th class="py-2 pr-4">Customer</th>
                     <th class="py-2 pr-4">Account</th>
-                    <th class="py-2 pr-4">Typ</th>
-                    <th class="py-2 pr-4">Punkte</th>
-                    <th class="py-2 pr-4">Saldo</th>
-                    <th class="py-2 pr-4">Begründung</th>
+                    <th class="py-2 pr-4">Type</th>
+                    <th class="py-2 pr-4">Points</th>
+                    <th class="py-2 pr-4">Balance</th>
+                    <th class="py-2 pr-4">Reason</th>
                 </tr>
                 </thead>
-                <tbody>
+                <tbody id="admin-home-ledger">
                 <tr th:each="entry : ${recentLedger}" class="border-t border-ink/10">
                     <td class="py-3 pr-4" th:text="${entry.occurredAt}">-</td>
                     <td class="py-3 pr-4" th:text="${entry.loyaltyAccount.customer.firstName + ' ' + entry.loyaltyAccount.customer.lastName}">-</td>

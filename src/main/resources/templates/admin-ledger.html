@@ -1,52 +1,78 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" th:replace="~{admin-layout :: layout('Admin Ledger', ~{::section})}">
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{admin-layout :: layout('Point Rates', ~{::section})}">
 <section class="space-y-8">
     <div class="card p-6 reveal">
-        <div class="text-sm uppercase tracking-[0.2em] text-ink/60">Punkte &amp; Ledger</div>
-        <div class="font-display text-2xl">Point Ledger</div>
-        <p class="mt-2 text-sm text-ink/60">Manuelle Korrekturen werden mit Zeitstempel und Begründung gespeichert.</p>
+        <div class="text-sm uppercase tracking-[0.2em] text-ink/60">Point Rates</div>
+        <div class="font-display text-2xl">Points per Currency Unit</div>
+        <p class="mt-2 text-sm text-ink/60">Define how many points customers earn per currency unit for each restaurant.</p>
         <div class="mt-4 text-sm text-red-700" th:if="${errorMessage != null}" th:text="${errorMessage}">Error</div>
     </div>
 
-    <div class="card p-6 reveal">
-        <div class="font-display text-xl">Punkte manuell anpassen</div>
-        <form class="mt-4 grid gap-4 md:grid-cols-4" action="/admin/ledger/adjust" method="post">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-            <input class="input" name="accountId" placeholder="Account ID" type="number" required>
-            <input class="input" name="pointsDelta" placeholder="+/- Punkte" type="number" required>
-            <input class="input md:col-span-2" name="reason" placeholder="Begründung" required>
-            <div class="md:col-span-4">
-                <button class="btn-primary" type="submit">Buchen</button>
+    <div class="card p-6 reveal space-y-6">
+        <div>
+            <div class="text-sm uppercase tracking-[0.2em] text-ink/60">Point Rates</div>
+            <div class="font-display text-xl">Rate Configuration</div>
+        </div>
+
+        <div class="grid gap-4 lg:grid-cols-2">
+            <div class="card p-4 border border-ink/10" th:each="restaurant : ${restaurants}">
+                <form class="space-y-3" action="/admin/points-rules/set" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <input type="hidden" name="restaurantId" th:value="${restaurant.id}">
+                    <div class="font-semibold" th:text="${restaurant.name}">Restaurant</div>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-xs uppercase tracking-[0.2em] text-ink/60">Points per currency unit</label>
+                        <input class="input" name="pointsPerEuro" type="number" min="0" step="0.01"
+                               th:value="${defaultRules[restaurant.id] != null ? defaultRules[restaurant.id].multiplier : 1}">
+                    </div>
+                    <label class="text-sm text-ink/60 flex items-center gap-2">
+                        <input type="checkbox" name="active"
+                               th:checked="${defaultRules[restaurant.id] != null ? defaultRules[restaurant.id].active : true}">
+                        Active rate
+                    </label>
+                    <button class="btn-secondary" type="submit">Save Rate</button>
+                </form>
             </div>
-        </form>
+        </div>
     </div>
 
-    <div class="card p-6 reveal overflow-auto">
-        <table class="min-w-full text-sm">
-            <thead>
-            <tr class="text-left text-ink/60 uppercase text-xs tracking-[0.2em]">
-                <th class="py-2 pr-4">Zeitpunkt</th>
-                <th class="py-2 pr-4">Kunde</th>
-                <th class="py-2 pr-4">Account</th>
-                <th class="py-2 pr-4">Typ</th>
-                <th class="py-2 pr-4">Punkte</th>
-                <th class="py-2 pr-4">Saldo</th>
-                <th class="py-2 pr-4">Beschreibung</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="entry : ${entries}" class="border-t border-ink/10">
-                <td class="py-3 pr-4" th:text="${entry.occurredAt}">-</td>
-                <td class="py-3 pr-4" th:text="${entry.loyaltyAccount.customer.firstName + ' ' + entry.loyaltyAccount.customer.lastName}">-</td>
-                <td class="py-3 pr-4" th:text="${entry.loyaltyAccount.accountNumber}">-</td>
-                <td class="py-3 pr-4" th:text="${entry.entryType}">-</td>
-                <td class="py-3 pr-4" th:text="${entry.points}">0</td>
-                <td class="py-3 pr-4" th:text="${entry.balanceAfter}">0</td>
-                <td class="py-3 pr-4" th:text="${entry.description}">-</td>
-            </tr>
-            </tbody>
-        </table>
+    <div class="card p-6 reveal space-y-4">
+        <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div>
+                <div class="text-sm uppercase tracking-[0.2em] text-ink/60">Point Ledger</div>
+                <div class="font-display text-xl">Latest Entries</div>
+            </div>
+            <div class="w-full md:w-72">
+                <input class="input" type="search" placeholder="Search ledger entries" data-search-input data-search-target="#ledger-rows">
+            </div>
+        </div>
+
+        <div class="overflow-auto">
+            <table class="min-w-full text-sm">
+                <thead>
+                <tr class="text-left text-ink/60 uppercase text-xs tracking-[0.2em]">
+                    <th class="py-2 pr-4">Timestamp</th>
+                    <th class="py-2 pr-4">Customer</th>
+                    <th class="py-2 pr-4">Account</th>
+                    <th class="py-2 pr-4">Type</th>
+                    <th class="py-2 pr-4">Points</th>
+                    <th class="py-2 pr-4">Balance</th>
+                    <th class="py-2 pr-4">Reason</th>
+                </tr>
+                </thead>
+                <tbody id="ledger-rows">
+                <tr th:each="entry : ${entries}" class="border-t border-ink/10">
+                    <td class="py-3 pr-4" th:text="${entry.occurredAt}">-</td>
+                    <td class="py-3 pr-4" th:text="${entry.loyaltyAccount.customer.firstName + ' ' + entry.loyaltyAccount.customer.lastName}">-</td>
+                    <td class="py-3 pr-4" th:text="${entry.loyaltyAccount.accountNumber}">-</td>
+                    <td class="py-3 pr-4" th:text="${entry.entryType}">-</td>
+                    <td class="py-3 pr-4" th:text="${entry.points}">0</td>
+                    <td class="py-3 pr-4" th:text="${entry.balanceAfter}">0</td>
+                    <td class="py-3 pr-4" th:text="${entry.description}">-</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </section>
 </html>
-
