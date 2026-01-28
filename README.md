@@ -31,6 +31,19 @@ at.htlle
   config
 ```
 
+## Authentifizierung & Rollen
+Es gibt zwei Rollen:
+- ADMIN: Zugriff auf Admin-Dashboard und REST-API (`/admin/**`, `/api/**`)
+- CUSTOMER: Zugriff auf Customer-Dashboard und Rewards (`/customer/**`)
+
+Standard-Zugaenge (Seed-Daten):
+- Admin: `admin@bonusapp.local` / `Admin123!`
+- Customer: `max.muster@example.com` / `Customer123!`
+
+Login/Registrierung:
+- Login: `/login`
+- Registrierung (Customer): `/register` (Restaurant-Code erforderlich)
+
 ## Datenbankdesign (3NF)
 Kernentitaeten:
 - Customer
@@ -42,6 +55,7 @@ Kernentitaeten:
 - PointLedger (EARN/REDEEM/ADJUST/EXPIRE, points != 0, balance_after)
 - Reward (cost_points > 0, aktiv, gueltig)
 - Redemption (account, reward, branch, ledger_entry_id 1:1)
+- AppUser (Login fuer ADMIN/CUSTOMER, optional mit Customer/Restaurant verknuepft)
 
 Wichtige Regeln:
 - Source of Truth fuer Punkte ist das PointLedger.
@@ -134,6 +148,10 @@ mvn clean test
 2) Anwendung starten:
 ```
 mvn spring-boot:run
+```
+Optional: Dev-Profil mit H2-Console
+```
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 3) H2-Console (optional):
 - URL: `http://localhost:8080/h2-console`
