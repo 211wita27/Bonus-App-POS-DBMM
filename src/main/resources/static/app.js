@@ -39,7 +39,12 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (node.tagName === "TBODY") {
         rows.push(...node.querySelectorAll("tr"));
       } else {
-        rows.push(...node.querySelectorAll("tr"));
+        const childRows = node.querySelectorAll("tr");
+        if (childRows.length) {
+          rows.push(...childRows);
+        } else {
+          rows.push(node);
+        }
       }
     });
     const filterRows = () => {

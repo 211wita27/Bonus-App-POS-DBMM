@@ -9,13 +9,19 @@
     </div>
 
     <div class="card p-6 reveal space-y-6">
-        <div>
-            <div class="text-sm uppercase tracking-[0.2em] text-ink/60">Point Rates</div>
-            <div class="font-display text-xl">Rate Configuration</div>
+        <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div>
+                <div class="text-sm uppercase tracking-[0.2em] text-ink/60">Point Rates</div>
+                <div class="font-display text-xl">Rate Configuration</div>
+            </div>
+            <div class="w-full md:w-72">
+                <input class="input" type="search" placeholder="Search restaurants"
+                       data-search-input data-search-target=".rate-card">
+            </div>
         </div>
 
         <div class="grid gap-4 lg:grid-cols-2">
-            <div class="card p-4 border border-ink/10" th:each="restaurant : ${restaurants}">
+            <div class="card p-4 border border-ink/10 rate-card" th:each="restaurant : ${restaurants}">
                 <form class="space-y-3" action="/admin/points-rules/set" method="post">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                     <input type="hidden" name="restaurantId" th:value="${restaurant.id}">

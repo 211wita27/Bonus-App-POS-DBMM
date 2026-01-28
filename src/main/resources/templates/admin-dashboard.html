@@ -42,7 +42,9 @@
             </div>
         </div>
         <div class="grid gap-3">
-            <div class="ledger-row restaurant-row" th:each="restaurant : ${restaurants}">
+            <a class="ledger-row restaurant-row block hover:border-ink/30"
+               th:each="restaurant : ${restaurants}"
+               th:href="'/admin/restaurants#restaurant-' + ${restaurant.id}">
                 <div class="flex items-center justify-between">
                     <div>
                         <div class="font-semibold" th:text="${restaurant.name}">Restaurant</div>
@@ -59,7 +61,7 @@
                 <div class="mt-2 text-sm text-ink/60">
                     Default currency: <span th:text="${restaurant.defaultCurrency}">EUR</span>
                 </div>
-            </div>
+            </a>
         </div>
     </div>
 </section>

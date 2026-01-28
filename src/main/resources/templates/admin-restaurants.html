@@ -34,7 +34,9 @@
                 </tr>
                 </thead>
                 <tbody id="restaurant-rows">
-                <tr th:each="restaurant : ${restaurants}" class="border-t border-ink/10">
+                <tr th:each="restaurant : ${restaurants}"
+                    th:id="'restaurant-' + ${restaurant.id}"
+                    class="border-t border-ink/10">
                     <td class="py-3 pr-4">
                         <input class="input table-input" type="text" name="name"
                                th:attr="form='restaurant-' + ${restaurant.id}"

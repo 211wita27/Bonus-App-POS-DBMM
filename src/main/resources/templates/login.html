@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{auth-layout :: authLayout('Login', ~{::section})}">
-<section class="space-y-8">
+<section class="space-y-8 pt-4 pb-2">
     <div>
         <div class="text-sm uppercase tracking-[0.2em] text-ink/60">Welcome back</div>
         <div class="font-display text-3xl">Sign in</div>
@@ -36,7 +36,7 @@
         <button class="btn-primary w-full" type="submit">Sign in</button>
     </form>
 
-    <div class="text-sm text-ink/70">
+    <div class="text-sm text-ink/70 pt-2">
         No account yet?
         <a class="font-semibold text-ink underline" href="/register">Create one</a>
     </div>
