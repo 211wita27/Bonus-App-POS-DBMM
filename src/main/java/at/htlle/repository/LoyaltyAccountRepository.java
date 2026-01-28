@@ -1,6 +1,7 @@
 package at.htlle.repository;
 
 import at.htlle.entity.LoyaltyAccount;
+import jakarta.persistence.LockModeType;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,13 +9,13 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import jakarta.persistence.LockModeType;
-
 public interface LoyaltyAccountRepository extends JpaRepository<LoyaltyAccount, Long> {
 
     Optional<LoyaltyAccount> findByAccountNumber(String accountNumber);
 
     Optional<LoyaltyAccount> findByCustomerIdAndRestaurantId(Long customerId, Long restaurantId);
+
+    List<LoyaltyAccount> findByCustomerId(Long customerId);
 
     List<LoyaltyAccount> findByCustomerIdOrderByIdAsc(Long customerId);
 

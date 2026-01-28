@@ -16,10 +16,6 @@
                 <span th:text="${redemption.rewardId}">-</span>
             </div>
             <div class="flex justify-between border-b border-emerald-200/70 py-2">
-                <span>Redemption Code</span>
-                <span th:text="${redemption.redemptionCode}">-</span>
-            </div>
-            <div class="flex justify-between border-b border-emerald-200/70 py-2">
                 <span>Points Spent</span>
                 <span th:text="${redemption.pointsSpent}">0</span>
             </div>
@@ -31,8 +27,8 @@
     </div>
 
     <div class="flex gap-3">
-        <a class="btn-secondary" href="/rewards">Back to Rewards</a>
-        <a class="btn-primary" href="/dashboard">View Dashboard</a>
+        <a class="btn-secondary" th:href="@{/customer/rewards(accountId=${accountId})}">Back to Rewards</a>
+        <a class="btn-primary" th:href="@{/customer/dashboard(accountId=${accountId})}">View Dashboard</a>
     </div>
 </section>
 </html>

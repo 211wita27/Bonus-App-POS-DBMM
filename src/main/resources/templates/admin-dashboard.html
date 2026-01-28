@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout('Admin Dashboard', ~{::section})}">
+<section class="space-y-8">
+    <div class="card p-6 reveal">
+        <div class="text-sm uppercase tracking-[0.2em] text-ink/60">Admin</div>
+        <div class="font-display text-2xl">Operations Dashboard</div>
+        <p class="mt-2 text-sm text-ink/60">Monitor restaurants, customers, and loyalty activity.</p>
+    </div>
+
+    <div class="grid gap-4 md:grid-cols-3">
+        <div class="card p-5 reveal">
+            <div class="text-xs uppercase tracking-[0.2em] text-ink/60">Restaurants</div>
+            <div class="font-display text-3xl" th:text="${restaurantCount}">0</div>
+        </div>
+        <div class="card p-5 reveal">
+            <div class="text-xs uppercase tracking-[0.2em] text-ink/60">Customers</div>
+            <div class="font-display text-3xl" th:text="${customerCount}">0</div>
+        </div>
+        <div class="card p-5 reveal">
+            <div class="text-xs uppercase tracking-[0.2em] text-ink/60">Accounts</div>
+            <div class="font-display text-3xl" th:text="${accountCount}">0</div>
+        </div>
+        <div class="card p-5 reveal">
+            <div class="text-xs uppercase tracking-[0.2em] text-ink/60">Rewards</div>
+            <div class="font-display text-3xl" th:text="${rewardCount}">0</div>
+        </div>
+        <div class="card p-5 reveal">
+            <div class="text-xs uppercase tracking-[0.2em] text-ink/60">Purchases</div>
+            <div class="font-display text-3xl" th:text="${purchaseCount}">0</div>
+        </div>
+        <div class="card p-5 reveal">
+            <div class="text-xs uppercase tracking-[0.2em] text-ink/60">Redemptions</div>
+            <div class="font-display text-3xl" th:text="${redemptionCount}">0</div>
+        </div>
+    </div>
+
+    <div class="card p-6 reveal">
+        <div class="text-sm uppercase tracking-[0.2em] text-ink/60">Restaurants</div>
+        <div class="mt-4 grid gap-3">
+            <div class="ledger-row" th:each="restaurant : ${restaurants}">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="font-semibold" th:text="${restaurant.name}">Restaurant</div>
+                        <div class="text-xs text-ink/60">
+                            Code: <span th:text="${restaurant.code}">CODE</span> ·
+                            Timezone: <span th:text="${restaurant.timezone}">TZ</span>
+                        </div>
+                    </div>
+                    <div class="text-xs uppercase tracking-[0.2em] text-ink/60">
+                        Branches:
+                        <span th:text="${branchCounts[restaurant.id]}">0</span>
+                    </div>
+                </div>
+                <div class="mt-2 text-sm text-ink/60">
+                    Default currency: <span th:text="${restaurant.defaultCurrency}">EUR</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</html>

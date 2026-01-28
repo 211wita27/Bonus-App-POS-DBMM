@@ -3,16 +3,13 @@ package at.htlle.controller;
 import at.htlle.dto.AccountResponse;
 import at.htlle.dto.PurchaseRequest;
 import at.htlle.dto.PurchaseResponse;
-import at.htlle.dto.PurchaseDetailsResponse;
 import at.htlle.dto.RedemptionRequest;
 import at.htlle.dto.RedemptionResponse;
 import at.htlle.entity.PointLedger;
 import at.htlle.entity.Purchase;
 import at.htlle.entity.Redemption;
-import at.htlle.repository.PointLedgerRepository;
-import at.htlle.service.AccountQueryService;
+import at.htlle.service.AccountService;
 import at.htlle.service.LoyaltyService;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import java.util.Objects;
 import org.springframework.http.HttpStatus;
@@ -30,16 +27,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class LoyaltyController {
 
     private final LoyaltyService loyaltyService;
-    private final PointLedgerRepository pointLedgerRepository;
-    private final AccountQueryService accountQueryService;
+    private final AccountService accountService;
 
     public LoyaltyController(
             LoyaltyService loyaltyService,
-            PointLedgerRepository pointLedgerRepository,
-            AccountQueryService accountQueryService) {
+            AccountService accountService) {
         this.loyaltyService = loyaltyService;
-        this.pointLedgerRepository = pointLedgerRepository;
-        this.accountQueryService = accountQueryService;
+        this.accountService = accountService;
     }
 
     @PostMapping("/purchases")
@@ -54,7 +48,7 @@ public class LoyaltyController {
                 purchase.getCurrency(),
                 purchase.getPurchasedAt(),
                 ledger.getLoyaltyAccount().getId(),
-                purchase.getRestaurant().getId(),
+                purchase.getBranch().getId(),
                 ledger.getId(),
                 ledger.getPoints(),
                 ledger.getBalanceAfter());
@@ -71,10 +65,9 @@ public class LoyaltyController {
                 redemption.getId(),
                 redemption.getLoyaltyAccount().getId(),
                 redemption.getReward().getId(),
-                redemption.getRestaurant().getId(),
+                redemption.getBranch().getId(),
                 ledger.getId(),
                 redemption.getPointsSpent(),
-                redemption.getRedemptionCode(),
                 ledger.getBalanceAfter(),
                 redemption.getStatus(),
                 redemption.getRedeemedAt());
@@ -85,33 +78,12 @@ public class LoyaltyController {
     @PostMapping("/accounts/{id}/sync")
     public AccountResponse synchronizeBalance(@PathVariable("id") Long accountId,
                                               @RequestParam(defaultValue = "false") boolean includeLedger) {
-        return accountQueryService.buildAccountResponse(
-                loyaltyService.synchronizeBalance(accountId),
-                includeLedger);
+        return accountService.buildAccountResponse(loyaltyService.synchronizeBalance(accountId), includeLedger);
     }
 
     @GetMapping("/accounts/{id}")
     public AccountResponse getAccount(@PathVariable("id") Long accountId,
                                       @RequestParam(defaultValue = "false") boolean includeLedger) {
-        return accountQueryService.getAccountResponse(accountId, includeLedger);
-    }
-
-    @GetMapping("/ledger/{id}/purchase")
-    public PurchaseDetailsResponse getPurchaseDetails(@PathVariable("id") Long ledgerId) {
-        PointLedger ledger = pointLedgerRepository.findById(ledgerId)
-                .orElseThrow(() -> new EntityNotFoundException("Ledger entry not found"));
-        Purchase purchase = ledger.getPurchase();
-        if (purchase == null) {
-            throw new EntityNotFoundException("Purchase not found for ledger entry");
-        }
-
-        return new PurchaseDetailsResponse(
-                ledger.getLoyaltyAccount().getId(),
-                purchase.getRestaurant().getId(),
-                purchase.getPurchaseNumber(),
-                purchase.getTotalAmount(),
-                purchase.getCurrency(),
-                purchase.getNotes(),
-                ledger.getDescription());
+        return accountService.getAccountResponse(accountId, includeLedger);
     }
 }
