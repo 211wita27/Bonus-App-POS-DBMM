@@ -1,15 +1,26 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout('Dashboard', ~{::section})}">
 <section class="space-y-8">
-    <div class="grid gap-6 lg:grid-cols-[2fr,1fr]">
+    <div class="grid gap-6">
+        <div class="card p-6 flex flex-col gap-4 justify-between reveal">
+            <div>
+                <div class="text-sm uppercase tracking-[0.2em] text-ink/60">Current Points</div>
+                <div class="points-big" th:text="${account != null ? account.currentPoints : 0}">0</div>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <span class="stat-pill" th:text="${account != null ? account.status : 'N/A'}">N/A</span>
+                <span class="stat-pill" th:text="${account != null ? account.tier : 'N/A'}">N/A</span>
+            </div>
+        </div>
+
         <div class="card p-6 reveal">
-            <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div class="flex flex-col gap-4">
                 <div>
                     <div class="text-sm uppercase tracking-[0.2em] text-ink/60">Account</div>
                     <div class="font-display text-2xl">Customer Dashboard</div>
                 </div>
                 <form class="flex flex-wrap gap-3 items-end" th:action="@{/customer/dashboard}" method="get">
-                    <div class="flex flex-col gap-2">
+                    <div class="flex flex-col gap-2 w-full">
                         <label class="text-xs uppercase tracking-[0.2em] text-ink/60" for="accountId">Restaurant</label>
                         <select class="input" id="accountId" name="accountId" data-auto-submit>
                             <option th:each="acc : ${accounts}"
@@ -23,17 +34,6 @@
                 </form>
             </div>
         </div>
-
-        <div class="card p-6 flex flex-col gap-4 justify-between reveal">
-            <div>
-                <div class="text-sm uppercase tracking-[0.2em] text-ink/60">Current Points</div>
-                <div class="points-big" th:text="${account != null ? account.currentPoints : 0}">0</div>
-            </div>
-            <div class="flex flex-wrap gap-2">
-                <span class="stat-pill" th:text="${account != null ? account.status : 'N/A'}">N/A</span>
-                <span class="stat-pill" th:text="${account != null ? account.tier : 'N/A'}">N/A</span>
-            </div>
-        </div>
     </div>
 
     <div th:if="${errorMessage != null}" class="card p-4 border border-red-200 bg-red-50 text-red-900 reveal">
@@ -41,7 +41,7 @@
         <div class="text-sm" th:text="${errorMessage}">Message</div>
     </div>
 
-    <div class="grid gap-6 lg:grid-cols-[1fr,1fr]">
+    <div class="grid gap-6">
         <div class="card p-6 reveal">
             <div class="text-sm uppercase tracking-[0.2em] text-ink/60">Account Details</div>
             <div class="mt-4 space-y-2 text-sm">
