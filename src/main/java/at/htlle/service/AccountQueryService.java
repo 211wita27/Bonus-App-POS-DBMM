@@ -45,6 +45,7 @@ public class AccountQueryService {
                 account.getCustomer().getFirstName(),
                 account.getCustomer().getLastName(),
                 account.getRestaurant().getId(),
+                account.getRestaurant().getName(),
                 account.getStatus(),
                 account.getTier(),
                 account.getCurrentPoints(),

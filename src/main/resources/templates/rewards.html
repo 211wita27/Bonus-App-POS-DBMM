@@ -12,12 +12,12 @@
             <div class="points-big" th:text="${account != null ? account.currentPoints : 0}">0</div>
             <form class="mt-4 flex gap-3 items-end" th:action="@{/customer/rewards}" method="get" data-loading>
                 <div class="flex flex-col gap-2">
-                    <label class="text-xs uppercase tracking-[0.2em] text-ink/60" for="accountId">Account</label>
+                    <label class="text-xs uppercase tracking-[0.2em] text-ink/60" for="accountId">Restaurant</label>
                     <select class="input" id="accountId" name="accountId">
                         <option th:each="acc : ${accounts}"
                                 th:value="${acc.id}"
                                 th:selected="${acc.id == accountId}"
-                                th:text="${acc.accountNumber}">
+                                th:text="${acc.restaurant.name}">
                             ACCT
                         </option>
                     </select>

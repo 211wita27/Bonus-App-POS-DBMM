@@ -9,7 +9,9 @@ import at.htlle.entity.Reward;
 import at.htlle.service.AccountService;
 import at.htlle.service.CurrentUserService;
 import at.htlle.service.LoyaltyService;
+import at.htlle.service.QrCodeService;
 import at.htlle.repository.RewardRepository;
+import jakarta.servlet.http.HttpSession;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Comparator;
@@ -24,23 +26,29 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class CustomerRewardController {
 
+    private static final String SELECTED_ACCOUNT_SESSION_KEY = "selectedAccountId";
+
     private final AccountService accountService;
     private final CurrentUserService currentUserService;
     private final LoyaltyService loyaltyService;
     private final RewardRepository rewardRepository;
+    private final QrCodeService qrCodeService;
 
     public CustomerRewardController(AccountService accountService,
                                     CurrentUserService currentUserService,
                                     LoyaltyService loyaltyService,
-                                    RewardRepository rewardRepository) {
+                                    RewardRepository rewardRepository,
+                                    QrCodeService qrCodeService) {
         this.accountService = accountService;
         this.currentUserService = currentUserService;
         this.loyaltyService = loyaltyService;
         this.rewardRepository = rewardRepository;
+        this.qrCodeService = qrCodeService;
     }
 
     @GetMapping("/customer/rewards")
     public String rewards(@RequestParam(name = "accountId", required = false) Long accountId,
+                          HttpSession session,
                           Model model) {
         AppUser user = currentUserService.getCurrentUser();
         if (user.getCustomer() == null) {
@@ -52,7 +60,7 @@ public class CustomerRewardController {
             model.addAttribute("errorMessage", "No loyalty accounts found.");
             return "rewards";
         }
-        LoyaltyAccount selected = selectAccount(accounts, accountId);
+        LoyaltyAccount selected = resolveSelectedAccount(accounts, accountId, session);
         AccountResponse accountResponse = accountService.buildAccountResponse(selected, false);
         List<RewardCard> rewardCards = buildRewardCards(selected);
 
@@ -67,6 +75,7 @@ public class CustomerRewardController {
     public String redeem(@RequestParam("accountId") Long accountId,
                          @RequestParam("rewardId") Long rewardId,
                          @RequestParam(name = "notes", required = false) String notes,
+                         HttpSession session,
                          Model model) {
         AppUser user = currentUserService.getCurrentUser();
         if (user.getCustomer() == null) {
@@ -82,12 +91,18 @@ public class CustomerRewardController {
         try {
             RedemptionRequest payload = new RedemptionRequest(account.getId(), rewardId, account.getRestaurant().getId(), notes);
             RedemptionResponse response = toResponse(loyaltyService.redeemReward(payload));
+            String qrPayload = buildQrPayload(response);
+            model.addAttribute("qrPayload", qrPayload);
+            model.addAttribute("qrCodeDataUri", qrCodeService.generateDataUri(qrPayload, 260));
             model.addAttribute("redemption", response);
             model.addAttribute("accountId", account.getId());
+            if (session != null) {
+                session.setAttribute(SELECTED_ACCOUNT_SESSION_KEY, account.getId());
+            }
             return "redemption-success";
         } catch (RuntimeException ex) {
             model.addAttribute("errorMessage", ex.getMessage());
-            return rewards(account.getId(), model);
+            return rewards(account.getId(), session, model);
         }
     }
 
@@ -127,6 +142,28 @@ public class CustomerRewardController {
                 .orElseThrow();
     }
 
+    private LoyaltyAccount resolveSelectedAccount(List<LoyaltyAccount> accounts, Long accountId, HttpSession session) {
+        // Persist selection across page switches via session.
+        Long resolvedId = accountId;
+        if (resolvedId == null && session != null) {
+            Object stored = session.getAttribute(SELECTED_ACCOUNT_SESSION_KEY);
+            if (stored instanceof Long) {
+                resolvedId = (Long) stored;
+            } else if (stored instanceof String storedValue) {
+                try {
+                    resolvedId = Long.valueOf(storedValue);
+                } catch (NumberFormatException ignored) {
+                    resolvedId = null;
+                }
+            }
+        }
+        LoyaltyAccount selected = selectAccount(accounts, resolvedId);
+        if (session != null) {
+            session.setAttribute(SELECTED_ACCOUNT_SESSION_KEY, selected.getId());
+        }
+        return selected;
+    }
+
     private RedemptionResponse toResponse(at.htlle.entity.Redemption redemption) {
         return new RedemptionResponse(
                 redemption.getId(),
@@ -139,6 +176,13 @@ public class CustomerRewardController {
                 redemption.getLedgerEntry().getBalanceAfter(),
                 redemption.getStatus(),
                 redemption.getRedeemedAt());
+    }
+
+    private String buildQrPayload(RedemptionResponse redemption) {
+        // Compact payload for mobile scanners.
+        return "BONUSAPP|REDEEM|" + redemption.redemptionCode()
+                + "|R" + redemption.restaurantId()
+                + "|A" + redemption.accountId();
     }
 
     public record RewardCard(Long rewardId, String name, String description, long costPoints) {

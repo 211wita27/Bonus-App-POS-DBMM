@@ -11,6 +11,7 @@ public record AccountResponse(
         String firstName,
         String lastName,
         Long restaurantId,
+        String restaurantName,
         LoyaltyAccount.Status status,
         LoyaltyAccount.Tier tier,
         Long currentPoints,

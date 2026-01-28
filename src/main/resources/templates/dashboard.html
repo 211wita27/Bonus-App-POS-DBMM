@@ -10,12 +10,12 @@
                 </div>
                 <form class="flex flex-wrap gap-3 items-end" th:action="@{/customer/dashboard}" method="get" data-loading>
                     <div class="flex flex-col gap-2">
-                        <label class="text-xs uppercase tracking-[0.2em] text-ink/60" for="accountId">Account</label>
+                        <label class="text-xs uppercase tracking-[0.2em] text-ink/60" for="accountId">Restaurant</label>
                         <select class="input" id="accountId" name="accountId">
                             <option th:each="acc : ${accounts}"
                                     th:value="${acc.id}"
                                     th:selected="${acc.id == accountId}"
-                                    th:text="${acc.accountNumber}">
+                                    th:text="${acc.restaurant.name}">
                                 ACCT
                             </option>
                         </select>
@@ -47,16 +47,16 @@
             <div class="text-sm uppercase tracking-[0.2em] text-ink/60">Account Details</div>
             <div class="mt-4 space-y-2 text-sm">
                 <div class="flex justify-between border-b border-ink/10 py-2">
-                    <span>Account Number</span>
-                    <span th:text="${account != null ? account.accountNumber : '-'}">-</span>
+                    <span>Restaurant</span>
+                    <span th:text="${account != null ? account.restaurantName : '-'}">-</span>
                 </div>
                 <div class="flex justify-between border-b border-ink/10 py-2">
                     <span>Customer Id</span>
                     <span th:text="${account != null ? account.customerId : '-'}">-</span>
                 </div>
                 <div class="flex justify-between border-b border-ink/10 py-2">
-                    <span>Restaurant Id</span>
-                    <span th:text="${account != null ? account.restaurantId : '-'}">-</span>
+                    <span>Account Number</span>
+                    <span th:text="${account != null ? account.accountNumber : '-'}">-</span>
                 </div>
                 <div class="flex justify-between border-b border-ink/10 py-2">
                     <span>Created</span>

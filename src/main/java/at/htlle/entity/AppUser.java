@@ -33,7 +33,8 @@ public class AppUser {
 
     public enum Role {
         ADMIN,
-        CUSTOMER
+        CUSTOMER,
+        RESTAURANT
     }
 
     @Id

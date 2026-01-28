@@ -25,6 +25,7 @@ public class SecurityConfig {
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                         .requestMatchers("/app.css", "/app.js", "/login", "/register", "/error").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/restaurant/**").hasRole("RESTAURANT")
                         .requestMatchers("/customer/**").hasRole("CUSTOMER")
                         .requestMatchers("/api/**").hasRole("ADMIN")
                         .requestMatchers("/h2-console/**").hasRole("ADMIN")

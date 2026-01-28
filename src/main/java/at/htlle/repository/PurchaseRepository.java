@@ -9,4 +9,6 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Long> {
     Optional<Purchase> findByPurchaseNumber(String purchaseNumber);
 
     List<Purchase> findAllByOrderByPurchasedAtDesc();
+
+    List<Purchase> findAllByRestaurantIdOrderByPurchasedAtDesc(Long restaurantId);
 }

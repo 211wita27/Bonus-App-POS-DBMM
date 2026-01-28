@@ -19,6 +19,8 @@ public interface LoyaltyAccountRepository extends JpaRepository<LoyaltyAccount, 
 
     List<LoyaltyAccount> findByCustomerIdOrderByIdAsc(Long customerId);
 
+    List<LoyaltyAccount> findByRestaurantIdOrderByIdAsc(Long restaurantId);
+
     @Query("select coalesce(sum(la.currentPoints),0) from LoyaltyAccount la")
     Long sumCurrentPoints();
 

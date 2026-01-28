@@ -10,5 +10,7 @@ public interface RedemptionRepository extends JpaRepository<Redemption, Long> {
 
     List<Redemption> findAllByOrderByRedeemedAtDesc();
 
+    List<Redemption> findByRestaurantIdOrderByRedeemedAtDesc(Long restaurantId);
+
     boolean existsByRedemptionCode(String redemptionCode);
 }

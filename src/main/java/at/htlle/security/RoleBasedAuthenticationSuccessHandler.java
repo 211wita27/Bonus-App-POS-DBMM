@@ -22,6 +22,10 @@ public class RoleBasedAuthenticationSuccessHandler implements AuthenticationSucc
                 target = "/admin/dashboard";
                 break;
             }
+            if ("ROLE_RESTAURANT".equals(authority.getAuthority())) {
+                target = "/restaurant/dashboard";
+                break;
+            }
         }
         response.sendRedirect(target);
     }
